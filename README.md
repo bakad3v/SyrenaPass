@@ -19,9 +19,13 @@ SyrenPass is an application that allows you to delete files when you enter a dec
 * Download app [Duress](https://github.com/x13a/Duress), open menu "BROADCAST" and set the following parameters.
 
   **action**: com.android.syrenapass.action.TRIGGER
+  
   **receiver**: com.android.syrenapass/.presentation.services.DuressListener
+  
   **key**: password
+  
   **value**: your password for SyrenaPass
+  
   **PIN/password or length**: A fake password to log in to the device (or its length), which will activate data deletion.
 
   <img src="./img/setup_duress.jpg" width="300"/>
