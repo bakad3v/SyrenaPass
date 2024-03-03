@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:startDestination="@id/passFragmentNav">
+  <fragment
+    android:id="@+id/passFragmentNav"
+    android:name="com.android.syrenapass.presentation.fragments.PassFragment">
+    <action
+      android:id="@+id/action_passFragment2_to_setupFilesFragment2"
+      app:destination="@id/setupFilesFragment" />
+  </fragment>
+  <fragment
+    android:id="@+id/setupFilesFragment"
+    android:name="com.android.syrenapass.presentation.fragments.SetupFilesFragment" />
+  <fragment
+    android:id="@+id/logsFragment"
+    android:name="com.android.syrenapass.presentation.fragments.LogsFragment" />
+  <fragment
+    android:id="@+id/aboutFragment"
+    android:name="com.android.syrenapass.presentation.fragments.AboutFragment"
+    android:label="AboutFragment" />
+  <fragment
+    android:id="@+id/settingsFragment"
+    android:name="com.android.syrenapass.presentation.fragments.SettingsFragment" />
+</navigation>

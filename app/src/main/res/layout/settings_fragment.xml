@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto">
+
+  <data>
+
+    <variable
+      name="viewmodel"
+      type="com.android.syrenapass.presentation.viewmodels.SettingsVM" />
+  </data>
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      android:layout_margin="8dp"
+      android:orientation="vertical"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent">
+
+
+      <LinearLayout
+        android:id="@+id/select_theme"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:orientation="horizontal"
+        android:paddingTop="16dp">
+
+        <com.google.android.material.textview.MaterialTextView
+          style="?attr/textAppearanceTitleLarge"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:paddingStart="8dp"
+          android:paddingEnd="8dp"
+          android:text="@string/theme">
+
+        </com.google.android.material.textview.MaterialTextView>
+
+        <com.google.android.material.textview.MaterialTextView
+          android:id="@+id/show_menu"
+          style="?attr/textAppearanceLabelLarge"
+          android:layout_width="0dp"
+          android:layout_height="match_parent"
+          android:layout_weight="1"
+          android:drawableEnd="@drawable/baseline_unfold_more_24"
+          android:gravity="center|end"
+          android:paddingStart="8dp"
+          android:paddingEnd="8dp"
+          app:currentTheme="@{viewmodel.settingsState}">
+
+        </com.google.android.material.textview.MaterialTextView>
+
+      </LinearLayout>
+
+      <LinearLayout
+        android:id="@+id/setup_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:orientation="horizontal"
+        android:paddingTop="16dp">
+
+        <com.google.android.material.textview.MaterialTextView
+          style="?attr/textAppearanceTitleLarge"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:paddingStart="8dp"
+          android:paddingEnd="8dp"
+          android:text="@string/change_password">
+        </com.google.android.material.textview.MaterialTextView>
+      </LinearLayout>
+
+      <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+
+      <com.google.android.material.button.MaterialButton
+        android:id="@+id/change_deletion_status"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="@string/enable_files_deletion"
+        app:buttonActivationStatus="@{viewmodel.settingsState}">
+
+      </com.google.android.material.button.MaterialButton>
+
+    </LinearLayout>
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

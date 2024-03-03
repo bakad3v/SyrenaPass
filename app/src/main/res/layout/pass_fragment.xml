@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto">
+
+  <data>
+
+    <variable
+      name="viewmodel"
+      type="com.android.syrenapass.presentation.viewmodels.PasswordsVM" />
+  </data>
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/linear"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <LinearLayout
+      android:id="@+id/linearLayout2"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      android:gravity="center">
+
+      <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:maxLines="1"
+        app:passwordText="@{viewmodel.passwordStatus}"
+        style="?attr/textAppearanceDisplaySmall" />
+
+      <com.google.android.material.textfield.TextInputLayout
+        style="@style/LoginTextInputLayoutStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:wrongPasswordError="@{viewmodel.passwordStatus}"
+        app:hintAnimationEnabled="true"
+        app:passwordToggleEnabled="true">
+
+
+        <com.google.android.material.textfield.TextInputEditText
+          android:id="@+id/password"
+          android:layout_width="250dp"
+          android:layout_height="wrap_content"
+          android:inputType="textPassword"
+          android:maxLines="1"
+          android:gravity="start"
+          app:textInputLayoutFocusedRectEnabled="false" />
+
+
+      </com.google.android.material.textfield.TextInputLayout>
+
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.Guideline
+      android:id="@+id/guideline20"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      app:layout_constraintGuide_end="10dp" />
+
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
