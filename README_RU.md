@@ -15,10 +15,15 @@ SyrenPass - это приложение, позволяющее удалять �
 
   <img src="./img/enable_deletion.jpg" width="300"/>
 * Скачайте приложение [Duress](https://github.com/x13a/Duress), откройте раздел "BROADCAST" и вставьте следующие параметры.
+
   **action**: com.android.syrenapass.action.TRIGGER
+
   **receiver**: com.android.syrenapass/.presentation.services.DuressListener
+  
   **key**: password
+  
   **value**: Ваш пароль от SyrenaPass
+  
   **PIN/password or length**: Фейковый пароль для входа в устройство (или его длина), который будет активировать удаление данных.
 
   <img src="./img/setup_duress.jpg" width="300"/>
