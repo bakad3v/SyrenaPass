@@ -48,7 +48,8 @@ class DeleteFilesService @AssistedInject constructor(
 
   override suspend fun doWork(): Result {
     val password = inputData.getString(PASSWORD) ?: return Result.failure()
-    if (!getSettingsUseCase().first().active) {
+    val checked = inputData.getBoolean(CHECKED,false)
+    if (!checked && !getSettingsUseCase().first().active) {
       return Result.failure()
     } //checking is deletion activated
     if (!checkPasswordUseCase(password.toCharArray())) {
@@ -236,13 +237,14 @@ class DeleteFilesService @AssistedInject constructor(
   companion object {
     private const val WORK_NAME = "delete_files_service"
     const val PASSWORD = "password"
-    fun start(context: Context, password: String) {
+    const val CHECKED = "checked"
+    fun start(context: Context, password: String,checked: Boolean) {
       val workManager = WorkManager.getInstance(context)
       workManager.enqueueUniqueWork(
         WORK_NAME,
         ExistingWorkPolicy.REPLACE,
         OneTimeWorkRequestBuilder<DeleteFilesService>().setInputData(
-          workDataOf(PASSWORD to password)
+          workDataOf(PASSWORD to password,CHECKED to checked)
         ).build()
       )
     }

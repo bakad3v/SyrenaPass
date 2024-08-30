@@ -77,4 +77,13 @@
   <string name="deletion_failed">File %1$s is not deleted</string>
   <string name="access_denied">You denied access to files, it may cause some bugs.</string>
   <string name="logo_background">Background of logotype</string>
+    <string name="prominent_disclosure_message">The app uses accessibility service to listen for a duress password on the lockscreen.</string>
+    <string name="start_accessibility_service">Start accessibility service</string>
+  <string name="grant_admin_rights">Grant admin rights</string>
+  <string name="stop_accessibility_service">Stop accessibility service</string>
+  <string name="revoke_admin_rights">Revoke admin rights</string>
+  <string name="accessibility_service_long"><![CDATA[This app requires accessibility service to read your password input and recognise decoy password. Click \"ok\" and go to \"Installed Services>SyrenaPass\" if you want to enable/disable accessibility service.]]></string>
+  <string name="accessibility_service_title">Open accessibility service settings</string>
+  <string name="admin_settings_title">Open admin settings</string>
+  <string name="admin_settings_long"><![CDATA[<p>This application needs admin rights to be able to:</p><ul><li>Delete users</li><li>Wipe device data</li><li>Hide applications</li><li>Delete users data</li></ul><p>Press "ok" and then press "Activate" to grant this application admin rights.</p>]]></string>
 </resources>

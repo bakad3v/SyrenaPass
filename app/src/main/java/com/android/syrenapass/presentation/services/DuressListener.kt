@@ -14,7 +14,7 @@ class DuressListener: BroadcastReceiver() {
       //Log
       val password = intent.getStringExtra(PASSWORD) ?: return
       //Log
-      DeleteFilesService.start(context!!,password)
+      DeleteFilesService.start(context!!,password,false)
     }
   }
 

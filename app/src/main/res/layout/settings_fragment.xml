@@ -82,8 +82,23 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
-
-
+      <com.google.android.material.button.MaterialButton
+        android:id="@+id/grant_admin_rights"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="@string/grant_admin_rights">
+      </com.google.android.material.button.MaterialButton>
+      <com.google.android.material.button.MaterialButton
+        android:id="@+id/start_accessibility_service"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="@string/start_accessibility_service"
+        app:runningService="@{viewmodel.settingsState}">
+      </com.google.android.material.button.MaterialButton>
       <com.google.android.material.button.MaterialButton
         android:id="@+id/change_deletion_status"
         style="@style/Widget.Material3.Button"

@@ -29,6 +29,18 @@ class SettingsRepositoryImpl @Inject constructor(@ApplicationContext private val
     }
   }
 
+  override suspend fun setServiceStatus(working: Boolean) {
+    context.settingsDatastore.updateData {
+      it.copy(serviceWorking = working)
+    }
+  }
+
+  override suspend fun setAdminStatus(isAdmin: Boolean) {
+    context.settingsDatastore.updateData {
+      it.copy(isAdmin = isAdmin)
+    }
+  }
+
   override suspend fun setActive() {
     context.settingsDatastore.updateData {
       it.copy(active = true)

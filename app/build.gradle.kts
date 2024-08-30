@@ -46,29 +46,29 @@ android {
 
 dependencies {
   val daggerVersion = "2.48"
-  val datastoreVersion = "1.0.0"
+  val datastoreVersion = "1.1.1"
   val roomVersion = "2.6.1"
-  val runtimeKtxVersion = "2.9.0"
-  val lifecycleVersion = "2.7.0"
+  val runtimeKtxVersion = "2.9.1"
+  val lifecycleVersion = "2.8.4"
   val sqlCipherVersion = "4.4.0"
   val sqliteVersion = "2.4.0"
   val coroutinesVersion = "1.7.3"
   val navigationVersion = "2.7.7"
-  val fragmentVersion = "1.6.2"
-  val hiltworkerVersion = "1.1.0"
+  val fragmentVersion = "1.8.2"
+  val hiltworkerVersion = "1.2.0"
   val securityVersion = "1.1.0-alpha06"
   val desugaringVersion = "2.0.4"
   val hiltVersion = "2.48"
   val leakCanaryVersion = "2.12"
-  val coilVersion = "2.1.0"
+  val coilVersion = "2.5.0"
   val storageVersion = "1.5.5"
   val serializeVersion = "1.6.2"
-  implementation("androidx.core:core-ktx:1.12.0")
-  implementation("androidx.appcompat:appcompat:1.6.1")
-  implementation("com.google.android.material:material:1.11.0")
+  implementation("androidx.core:core-ktx:1.13.1")
+  implementation("androidx.appcompat:appcompat:1.7.0")
+  implementation("com.google.android.material:material:1.12.0")
   testImplementation("junit:junit:4.13.2")
-  androidTestImplementation("androidx.test.ext:junit:1.1.5")
-  androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+  androidTestImplementation("androidx.test.ext:junit:1.2.1")
+  androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
   implementation ("com.google.dagger:dagger:$daggerVersion")
   kapt ("com.google.dagger:dagger-compiler:$daggerVersion")
   implementation ("androidx.datastore:datastore-preferences:$datastoreVersion")

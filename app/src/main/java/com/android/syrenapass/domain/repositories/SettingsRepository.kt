@@ -10,4 +10,7 @@ interface SettingsRepository {
   suspend fun setTheme(theme: Theme)
   suspend fun setActive()
   suspend fun setInactive()
+  suspend fun setServiceStatus(working: Boolean)
+
+  suspend fun setAdminStatus(isAdmin: Boolean)
 }

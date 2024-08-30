@@ -1,10 +1,12 @@
 package com.android.syrenapass.presentation.viewmodels
 
+import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.syrenapass.R
 import com.android.syrenapass.domain.entities.Settings
 import com.android.syrenapass.domain.entities.Theme
+import com.android.syrenapass.domain.usecases.admin.RequestAdminRightsUseCase
 import com.android.syrenapass.domain.usecases.passwordManager.ChangePasswordUseCase
 import com.android.syrenapass.domain.usecases.settings.GetSettingsUseCase
 import com.android.syrenapass.domain.usecases.settings.SetActiveUseCase
@@ -27,16 +29,22 @@ class SettingsVM @Inject constructor(
   private val changePasswordUseCase: ChangePasswordUseCase,
   private val settingsActionChannel: Channel<DialogActions>,
   private val setInactiveUseCase: SetInactiveUseCase,
-  private val setActiveUseCase: SetActiveUseCase
+  private val setActiveUseCase: SetActiveUseCase,
+  private val requestAdminRightsUseCase: RequestAdminRightsUseCase
 ) : ViewModel() {
 
   val settingsActionsFlow = settingsActionChannel.receiveAsFlow()
 
-  val settingsState = getSettingsUseCase().stateIn(
-    viewModelScope,
-    SharingStarted.WhileSubscribed(5000),
-    Settings()
-  )
+  val settingsState =
+    getSettingsUseCase().stateIn(
+      viewModelScope,
+      SharingStarted.WhileSubscribed(5000),
+      Settings()
+    )
+
+  fun adminRightsIntent(): Intent {
+    return requestAdminRightsUseCase()
+  }
 
   fun setTheme(theme: Theme) {
     viewModelScope.launch {
@@ -88,6 +96,30 @@ class SettingsVM @Inject constructor(
     )
   }
 
+  fun showAccessibilityServiceDialog() {
+    viewModelScope.launch {
+      settingsActionChannel.send(
+        DialogActions.ShowQuestionDialog(
+          title = UIText.StringResource(R.string.accessibility_service_title),
+          message = UIText.StringResource(R.string.accessibility_service_long),
+          MOVE_TO_ACCESSIBILITY_SERVICE
+        )
+      )
+    }
+  }
+
+  fun showDeviceAdminRightsDialog() {
+    viewModelScope.launch {
+      settingsActionChannel.send(
+        DialogActions.ShowQuestionDialog(
+          title = UIText.StringResource(R.string.admin_settings_title),
+          message = UIText.StringResource(R.string.admin_settings_long),
+          MOVE_TO_ADMIN_SETTINGS
+        )
+      )
+    }
+  }
+
   fun showFaq() {
     viewModelScope.launch {
       settingsActionChannel.send(
@@ -101,6 +133,8 @@ class SettingsVM @Inject constructor(
 
   companion object {
     const val CONFIRM_AUTODELETION_REQUEST = "confirm_autodeletion_start"
+    const val MOVE_TO_ACCESSIBILITY_SERVICE = "move_to_accessibility_service"
+    const val MOVE_TO_ADMIN_SETTINGS = "move_to_admin_settings"
   }
 
 }
