@@ -63,6 +63,7 @@ dependencies {
   val coilVersion = "2.5.0"
   val storageVersion = "1.5.5"
   val serializeVersion = "1.6.2"
+  val libsuVersion = "5.0.0"
   implementation("androidx.core:core-ktx:1.13.1")
   implementation("androidx.appcompat:appcompat:1.7.0")
   implementation("com.google.android.material:material:1.12.0")
@@ -87,6 +88,7 @@ dependencies {
   implementation("androidx.fragment:fragment-ktx:$fragmentVersion")
   implementation ("androidx.hilt:hilt-work:$hiltworkerVersion")
   kapt ("androidx.hilt:hilt-compiler:$hiltworkerVersion")
+  implementation ("com.github.topjohnwu.libsu:core:$libsuVersion")
   implementation( "androidx.security:security-crypto-ktx:$securityVersion")
   coreLibraryDesugaring ("com.android.tools:desugar_jdk_libs:$desugaringVersion")
   debugImplementation ("com.squareup.leakcanary:leakcanary-android:$leakCanaryVersion")

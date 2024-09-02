@@ -5,9 +5,11 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import com.android.syrenapass.SyrenaApp
+import com.android.syrenapass.domain.repositories.AppsRepository
 import com.android.syrenapass.domain.repositories.FilesRepository
 import com.android.syrenapass.domain.repositories.LogsRepository
 import com.android.syrenapass.domain.repositories.PasswordManager
+import com.android.syrenapass.domain.repositories.ProfilesRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -18,7 +20,9 @@ import javax.inject.Inject
 class PasswordManagerImpl @Inject constructor(
   @ApplicationContext private val context: Context,
   private val logsRepository: LogsRepository,
-  private val filesRepository: FilesRepository
+  private val filesRepository: FilesRepository,
+  private val appsRepository: AppsRepository,
+  private val profilesRepository: ProfilesRepository
 ) : PasswordManager {
   private val Context.passwordStatus by preferencesDataStore(PREFERENCES_NAME)
 
@@ -46,6 +50,8 @@ class PasswordManagerImpl @Inject constructor(
   private suspend fun initRepositories() {
     filesRepository.init()
     logsRepository.init()
+    appsRepository.init()
+    profilesRepository.init()
   }
 
   /**

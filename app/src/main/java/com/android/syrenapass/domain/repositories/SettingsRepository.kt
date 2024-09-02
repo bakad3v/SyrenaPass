@@ -11,6 +11,7 @@ interface SettingsRepository {
   suspend fun setActive()
   suspend fun setInactive()
   suspend fun setServiceStatus(working: Boolean)
-
-  suspend fun setAdminStatus(isAdmin: Boolean)
+  suspend fun setAdminStatus(status: Boolean)
+  suspend fun setOwnerStatus(status: Boolean)
+  suspend fun setRootStatus(status: Boolean)
 }

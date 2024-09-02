@@ -4,6 +4,10 @@
   >
   <uses-feature android:name="android.software.device_admin" android:required="false" />
   <uses-feature android:name="android.software.managed_users" android:required="true"/>
+
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+      tools:ignore="QueryAllPackagesPermission" />
   <uses-permission
     android:name="android.permission.READ_EXTERNAL_STORAGE"
     android:maxSdkVersion="32" />

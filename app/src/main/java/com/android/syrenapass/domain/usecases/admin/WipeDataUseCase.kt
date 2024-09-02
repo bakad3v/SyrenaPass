@@ -1,10 +1,9 @@
 package com.android.syrenapass.domain.usecases.admin
 
-import com.android.syrenapass.domain.repositories.DeviceAdmin
 import javax.inject.Inject
 
-class WipeDataUseCase @Inject constructor(private val deviceAdmin: DeviceAdmin) {
+class WipeDataUseCase @Inject constructor(private val adminFunctions: AdminFunctions) {
   operator fun invoke() {
-    deviceAdmin.wipeData()
+    adminFunctions.wipeData()
   }
 }

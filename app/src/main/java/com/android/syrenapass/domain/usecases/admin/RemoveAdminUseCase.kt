@@ -1,10 +1,9 @@
 package com.android.syrenapass.domain.usecases.admin
 
-import com.android.syrenapass.domain.repositories.DeviceAdmin
 import javax.inject.Inject
 
-class RemoveAdminUseCase @Inject constructor(private val deviceAdmin: DeviceAdmin) {
+class RemoveAdminUseCase @Inject constructor(private val adminFunctions: AdminFunctions) {
   operator fun invoke() {
-    deviceAdmin.removeAdmin()
+    adminFunctions.removeAdmin()
   }
 }

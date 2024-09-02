@@ -35,12 +35,6 @@ class SettingsRepositoryImpl @Inject constructor(@ApplicationContext private val
     }
   }
 
-  override suspend fun setAdminStatus(isAdmin: Boolean) {
-    context.settingsDatastore.updateData {
-      it.copy(isAdmin = isAdmin)
-    }
-  }
-
   override suspend fun setActive() {
     context.settingsDatastore.updateData {
       it.copy(active = true)
@@ -50,6 +44,24 @@ class SettingsRepositoryImpl @Inject constructor(@ApplicationContext private val
   override suspend fun setInactive() {
     context.settingsDatastore.updateData {
       it.copy(active = false)
+    }
+  }
+
+  override suspend fun setAdminStatus(status: Boolean) {
+    context.settingsDatastore.updateData {
+      it.copy(isAdmin = status)
+    }
+  }
+
+  override suspend fun setOwnerStatus(status: Boolean) {
+    context.settingsDatastore.updateData {
+      it.copy(isOwner = status)
+    }
+  }
+
+  override suspend fun setRootStatus(status: Boolean) {
+    context.settingsDatastore.updateData {
+      it.copy(isRoot = status)
     }
   }
 }
