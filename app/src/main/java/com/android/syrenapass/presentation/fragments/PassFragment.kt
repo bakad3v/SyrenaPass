@@ -18,6 +18,7 @@ import com.android.syrenapass.presentation.activities.MainActivity
 import com.android.syrenapass.presentation.states.ActivityState
 import com.android.syrenapass.presentation.states.PasswordState
 import com.android.syrenapass.presentation.viewmodels.PasswordsVM
+import com.google.android.material.textfield.TextInputEditText
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -87,8 +88,8 @@ class PassFragment: Fragment() {
     inputMethodManager.hideSoftInputFromWindow(view?.windowToken, 0)
   }
 
-  override fun onDestroy() {
+  override fun onDestroyView() {
     _binding = null
-    super.onDestroy()
+    super.onDestroyView()
   }
 }

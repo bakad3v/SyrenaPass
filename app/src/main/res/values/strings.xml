@@ -91,7 +91,8 @@
   <string name="unknow_admin_error">Device admin action failed for some reason: %1$s</string>
   <string name="unknow_owner_error">Device owner action failed for some reason: %1$s</string>
   <string name="unknow_root_error">Root action failed for some reason: %1$s</string>
-  <string name="wrong_android_version">\"Wrong android version, SDK version %1$s or higher required\"</string>
+  <string name="wrong_android_version">Wrong android version, SDK version %1$s or higher required</string>
   <string name="no_root_rights">App doesn\'t have root rights</string>
   <string name="no_superuser_rights">You don\'t have superuser rights</string>
+
 </resources>

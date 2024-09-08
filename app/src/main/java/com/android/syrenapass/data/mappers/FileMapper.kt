@@ -1,22 +1,22 @@
 package com.android.syrenapass.data.mappers
 
 import android.net.Uri
-import com.android.syrenapass.data.db.FileDbModel
+import com.android.syrenapass.data.entities.FileDatastore
+import com.android.syrenapass.data.entities.FilesList
 import com.android.syrenapass.domain.entities.FileDomain
 import javax.inject.Inject
 
 class FileMapper @Inject constructor() {
-  private fun mapDbToDtModel(fileDbModel: FileDbModel) =
+  private fun mapDatastoreToDtModel(fileDatastore: FileDatastore) =
     FileDomain(
-      size = fileDbModel.size,
-      name = fileDbModel.name,
-      priority = fileDbModel.priority,
-      uri = Uri.parse(fileDbModel.uri),
-      fileType = fileDbModel.fileType,
-      sizeFormatted = fileDbModel.sizeFormatted
+      size = fileDatastore.size,
+      name = fileDatastore.name,
+      priority = fileDatastore.priority,
+      uri = Uri.parse(fileDatastore.uri),
+      fileType = fileDatastore.fileType,
+      sizeFormatted = fileDatastore.sizeFormatted
     )
 
-  fun mapDbListToDtList(dbList: List<FileDbModel>): List<FileDomain> =
-    dbList.map { mapDbToDtModel(it) }
-
+  fun mapDatastoreListToDtList(list: FilesList): List<FileDomain> =
+    list.list.map { mapDatastoreToDtModel(it) }
 }

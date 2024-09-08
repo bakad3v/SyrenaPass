@@ -47,7 +47,6 @@ android {
 dependencies {
   val daggerVersion = "2.48"
   val datastoreVersion = "1.1.1"
-  val roomVersion = "2.6.1"
   val runtimeKtxVersion = "2.9.1"
   val lifecycleVersion = "2.8.4"
   val sqlCipherVersion = "4.4.0"
@@ -73,14 +72,10 @@ dependencies {
   implementation ("com.google.dagger:dagger:$daggerVersion")
   kapt ("com.google.dagger:dagger-compiler:$daggerVersion")
   implementation ("androidx.datastore:datastore-preferences:$datastoreVersion")
-  implementation("androidx.room:room-ktx:$roomVersion")
   implementation ("androidx.work:work-runtime-ktx:$runtimeKtxVersion")
   implementation( "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
   implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
-  annotationProcessor("androidx.room:room-compiler:$roomVersion")
-  kapt ("androidx.room:room-compiler:$roomVersion")
-  implementation ("androidx.room:room-runtime:$roomVersion")
-  implementation ("net.zetetic:android-database-sqlcipher:$sqlCipherVersion")
+  implementation ("org.signal:argon2:13.1@aar")
   implementation( "androidx.sqlite:sqlite-ktx:$sqliteVersion")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
   implementation("androidx.navigation:navigation-fragment-ktx:$navigationVersion")
@@ -98,4 +93,5 @@ dependencies {
   implementation ("com.anggrayudi:storage:$storageVersion")
   api("org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.4.0")
   implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializeVersion")
+  implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.7")
 }

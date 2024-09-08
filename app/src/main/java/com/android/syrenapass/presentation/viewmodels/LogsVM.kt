@@ -18,6 +18,7 @@ import com.android.syrenapass.presentation.states.LogsDataState
 import com.android.syrenapass.presentation.utils.DateValidatorAllowed
 import com.android.syrenapass.presentation.utils.UIText
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -70,7 +71,7 @@ class LogsVM @Inject constructor(
   }
 
   fun changeAutoDeletionTimeout(timeout: Int) {
-    viewModelScope.launch {
+    viewModelScope.launch(Dispatchers.IO) {
       changeAutoDeletionTimeOutUseCase(timeout)
     }
   }

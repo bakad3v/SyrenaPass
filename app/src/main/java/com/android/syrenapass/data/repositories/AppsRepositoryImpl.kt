@@ -1,27 +1,21 @@
 package com.android.syrenapass.data.repositories
 
 import android.content.Context
-import com.android.syrenapass.data.db.AppDao
-import com.android.syrenapass.data.db.FileDao
-import com.android.syrenapass.data.db.ProfileDAO
+import androidx.datastore.dataStore
 import com.android.syrenapass.data.mappers.AppsMapper
+import com.android.syrenapass.data.serializers.AppsSerializer
 import com.android.syrenapass.domain.entities.AppDomain
 import com.android.syrenapass.domain.repositories.AppsRepository
-import dagger.Lazy
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class AppsRepositoryImpl @Inject constructor(@ApplicationContext private val context: Context, private val appsMapper: AppsMapper, private val lazyAppsDao: Lazy<AppDao>): AppsRepository {
+class AppsRepositoryImpl @Inject constructor(@ApplicationContext private val context: Context, private val appsMapper: AppsMapper, appsSerializer: AppsSerializer): AppsRepository {
 
-    private lateinit var appsDao: AppDao
+    private val Context.appsDatastore by dataStore(DATASTORE_NAME,appsSerializer)
 
-    override fun init() {
-        appsDao = lazyAppsDao.get()
-    }
-
-    override fun getManagedApps() : Flow<List<AppDomain>> = appsDao.getAppsSortedByNameAsc().map { appDbModels -> appDbModels.map {appsMapper.mapDbToDt(context,it)} }
+    override fun getManagedApps() : Flow<List<AppDomain>> = context.appsDatastore.data.map { appsMapper.mapListDatastoreToListDt(context,it) }
 
     override fun getInstalledApplications(): List<AppDomain> {
         val installedApps: List<AppDomain> = context.packageManager.getInstalledPackages(0).map{ appsMapper.mapPackageInfoToAppDT(context,it)}
@@ -29,29 +23,40 @@ class AppsRepositoryImpl @Inject constructor(@ApplicationContext private val con
     }
 
     override suspend fun addApplications(apps: List<AppDomain>) {
-        apps.forEach {
-            appsDao.upsert(appsMapper.mapDtToDb(it))
+        context.appsDatastore.updateData {
+            it.addMultiple(appsMapper.mapDtListToDatastore(apps))
         }
     }
 
     override suspend fun setDeletionStatus(status: Boolean, packageName: String) {
-        appsDao.setDeletionStatus(status,packageName)
+        context.appsDatastore.updateData {
+            it.setDeletionStatus(packageName, status)
+        }
     }
 
     override suspend fun setHiddenStatus(status: Boolean, packageName: String) {
-        appsDao.setHiddenStatus(status,packageName)
+        context.appsDatastore.updateData {
+            it.setHideStatus(packageName, status)
+        }
     }
 
     override suspend fun setDataClearStatus(status: Boolean, packageName: String) {
-        appsDao.setClearedStatus(status,packageName)
+        context.appsDatastore.updateData {
+            it.setClearDataStatus(packageName, status)
+        }
     }
 
     override suspend fun removeApplication(packageName: String) {
-        appsDao.delete(packageName)
+        context.appsDatastore.updateData {
+            it.delete(packageName)
+        }
     }
 
     override suspend fun clearDb() {
-        appsDao.clearDb()
+        context.appsDatastore.updateData {  it.clear() }
     }
 
+    companion object {
+        private const val DATASTORE_NAME = "apps_datastore.json"
+    }
 }

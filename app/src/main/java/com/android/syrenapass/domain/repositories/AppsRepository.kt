@@ -9,7 +9,6 @@ interface AppsRepository {
     suspend fun addApplications(apps: List<AppDomain>)
     suspend fun removeApplication(packageName: String)
     suspend fun clearDb()
-    fun init()
     suspend fun setDeletionStatus(status: Boolean, packageName: String)
     suspend fun setHiddenStatus(status: Boolean, packageName: String)
     suspend fun setDataClearStatus(status: Boolean, packageName: String)

@@ -1,6 +1,7 @@
 package com.android.syrenapass.superuser.superuser
 
 import com.android.syrenapass.domain.entities.ProfileDomain
+import com.topjohnwu.superuser.Shell
 import kotlin.jvm.Throws
 
 interface SuperUser {
@@ -17,4 +18,9 @@ interface SuperUser {
     suspend fun hideApp(packageName: String)
     @Throws(SuperUserException::class)
     suspend fun clearAppData(packageName: String)
+    @Throws(SuperUserException::class)
+    suspend fun runTrim()
+    @Throws(SuperUserException::class)
+    suspend fun executeRootCommand(command: String): Shell.Result
+
 }

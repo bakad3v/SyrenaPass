@@ -202,9 +202,9 @@ class LogsFragment : Fragment() {
     }
   }
 
-  override fun onDestroy() {
+  override fun onDestroyView() {
     _logBinding = null
-    super.onDestroy()
+    super.onDestroyView()
   }
 
   companion object {

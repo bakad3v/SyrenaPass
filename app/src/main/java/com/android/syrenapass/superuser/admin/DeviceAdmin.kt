@@ -12,6 +12,7 @@ import com.android.syrenapass.presentation.services.DeviceAdminReceiver
 import com.android.syrenapass.presentation.utils.UIText
 import com.android.syrenapass.superuser.superuser.SuperUser
 import com.android.syrenapass.superuser.superuser.SuperUserException
+import com.topjohnwu.superuser.Shell
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -67,6 +68,14 @@ class DeviceAdmin @Inject constructor(@ApplicationContext private val context: C
     }
 
     override suspend fun clearAppData(packageName: String) {
+        throw SuperUserException(ADMIN_ERROR_TEXT,UIText.StringResource(R.string.device_admin_error))
+    }
+
+    override suspend fun runTrim() {
+        throw SuperUserException(ADMIN_ERROR_TEXT,UIText.StringResource(R.string.device_admin_error))
+    }
+
+    override suspend fun executeRootCommand(command: String): Shell.Result {
         throw SuperUserException(ADMIN_ERROR_TEXT,UIText.StringResource(R.string.device_admin_error))
     }
 

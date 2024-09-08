@@ -15,9 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MainVM @Inject constructor(
   private val _activityState: MutableStateFlow<ActivityState>,
-  getSettingsUseCase: GetSettingsUseCase
-): ViewModel() {
-
+  getSettingsUseCase: GetSettingsUseCase): ViewModel() {
   val activityState: StateFlow<ActivityState> get() = _activityState.asStateFlow()
 
   val theme = getSettingsUseCase().map { it.theme }

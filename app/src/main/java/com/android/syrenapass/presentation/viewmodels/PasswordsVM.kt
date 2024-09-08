@@ -24,7 +24,7 @@ class PasswordsVM @Inject constructor(
   private val setPasswordUseCase: SetPasswordUseCase,
   private val getPasswordStatusUseCase: GetPasswordStatusUseCase,
   private val passwordState: MutableSharedFlow<PasswordState>,
-  private val writeToLogsUseCase: WriteToLogsUseCase,
+  private val writeToLogsUseCase: WriteToLogsUseCase
 ) : ViewModel() {
   val passwordStatus = getPasswordStatusUseCase().map {
     if (it) {
@@ -49,13 +49,15 @@ class PasswordsVM @Inject constructor(
   }
 
 
+
   private suspend fun setPassword(password: CharArray) {
     setPasswordUseCase(password)
     passwordState.emit(PasswordState.CheckPasswordResults(true))
   }
 
   private suspend fun checkPassword(password: CharArray) {
-    passwordState.emit(PasswordState.CheckPasswordResults(checkPasswordUseCase(password)))
+    val results = checkPasswordUseCase(password)
+    passwordState.emit(PasswordState.CheckPasswordResults(results))
   }
 
   suspend fun writeToLogs(string: String) {

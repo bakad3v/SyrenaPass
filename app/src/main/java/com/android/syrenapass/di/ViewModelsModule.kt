@@ -5,6 +5,7 @@ import com.android.syrenapass.presentation.actions.FileSettingsAction
 import com.android.syrenapass.presentation.actions.LogsActions
 import com.android.syrenapass.presentation.states.ActivityState
 import com.android.syrenapass.presentation.states.LogsDataState
+import com.android.syrenapass.presentation.states.PasswordState
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,6 +17,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @InstallIn(ViewModelComponent::class)
 @Module
 class ViewModelsModule {
+
+  @Provides
+  fun providePasswordStateFlow(): MutableSharedFlow<PasswordState> = MutableSharedFlow()
 
   @Provides
   fun provideDeletionSettingsActionChannel(): Channel<FileSettingsAction> = Channel()

@@ -15,5 +15,5 @@ interface LogsRepository {
   fun getLogsText(): Flow<LogEntity>
   fun getLogsData(): Flow<LogsData>
   suspend fun init()
-    fun getAvailableDays(): Flow<List<Long>>
+  fun getAvailableDays(): Flow<Set<Long>>
 }

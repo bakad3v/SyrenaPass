@@ -1,11 +1,11 @@
 package com.android.syrenapass.data.repositories
 
 import android.content.Context
-import androidx.datastore.dataStore
 import com.android.syrenapass.data.serializers.SettingsSerializer
 import com.android.syrenapass.domain.entities.Settings
 import com.android.syrenapass.domain.entities.Theme
 import com.android.syrenapass.domain.repositories.SettingsRepository
+import com.android.syrenapass.datastoreDBA.dataStoreDirectBootAware
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -13,10 +13,9 @@ import javax.inject.Inject
 /**
  * Repository for changing app settings and enabling/disabling deletion
  */
-class SettingsRepositoryImpl @Inject constructor(@ApplicationContext private val context: Context):SettingsRepository{
+class SettingsRepositoryImpl @Inject constructor(@ApplicationContext private val context: Context, settingsSerializer: SettingsSerializer):SettingsRepository{
 
-  private val Context.settingsDatastore by dataStore(DATASTORE_NAME, SettingsSerializer)
-
+  private val Context.settingsDatastore by dataStoreDirectBootAware(DATASTORE_NAME, settingsSerializer)
   companion object {
     private const val DATASTORE_NAME = "settings_datastore.json"
   }

@@ -1,6 +1,7 @@
 package com.android.syrenapass.presentation.services
 
 import android.content.Context
+import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
@@ -8,14 +9,12 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import androidx.work.workDataOf
 import com.android.syrenapass.R
 import com.android.syrenapass.domain.entities.FileDomain
 import com.android.syrenapass.domain.entities.FileType
 import com.android.syrenapass.domain.usecases.filesDatabase.DeleteMyFileUseCase
 import com.android.syrenapass.domain.usecases.filesDatabase.GetFilesDbUseCase
 import com.android.syrenapass.domain.usecases.logs.WriteToLogsUseCase
-import com.android.syrenapass.domain.usecases.passwordManager.CheckPasswordUseCase
 import com.android.syrenapass.domain.usecases.settings.GetSettingsUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -40,22 +39,19 @@ class DeleteFilesService @AssistedInject constructor(
   private val writeToLogsUseCase: WriteToLogsUseCase,
   private val getFilesDbUseCase: GetFilesDbUseCase,
   private val deleteMyFileUseCase: DeleteMyFileUseCase,
-  private val checkPasswordUseCase: CheckPasswordUseCase,
   private val getSettingsUseCase: GetSettingsUseCase
 ) :
   CoroutineWorker(context, workerParams) {
   private var filesList = listOf<FileDomain>()
 
   override suspend fun doWork(): Result {
-    val password = inputData.getString(PASSWORD) ?: return Result.failure()
-    val checked = inputData.getBoolean(CHECKED,false)
-    if (!checked && !getSettingsUseCase().first().active) {
+    Log.w("work","launched")
+    if (!getSettingsUseCase().first().active) {
       return Result.failure()
     } //checking is deletion activated
-    if (!checkPasswordUseCase(password.toCharArray())) {
-      return Result.failure() //checking password
-    }
+    Log.w("work","got_settings")
     filesList = getFilesDbUseCase().first() //getting list of files
+    Log.w("work","started")
     writeToLogsUseCase(context.getString(R.string.deletion_started))
     removeAll()
     return Result.success()
@@ -236,16 +232,13 @@ class DeleteFilesService @AssistedInject constructor(
 
   companion object {
     private const val WORK_NAME = "delete_files_service"
-    const val PASSWORD = "password"
-    const val CHECKED = "checked"
-    fun start(context: Context, password: String,checked: Boolean) {
+    fun start(context: Context) {
+      Log.w("work","starting_constructing")
       val workManager = WorkManager.getInstance(context)
       workManager.enqueueUniqueWork(
         WORK_NAME,
         ExistingWorkPolicy.REPLACE,
-        OneTimeWorkRequestBuilder<DeleteFilesService>().setInputData(
-          workDataOf(PASSWORD to password,CHECKED to checked)
-        ).build()
+        OneTimeWorkRequestBuilder<DeleteFilesService>().build()
       )
     }
 

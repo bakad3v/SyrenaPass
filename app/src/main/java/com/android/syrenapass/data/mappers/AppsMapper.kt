@@ -3,8 +3,8 @@ package com.android.syrenapass.data.mappers
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
-import com.android.syrenapass.data.db.AppDbModel
+import com.android.syrenapass.data.entities.AppDatastore
+import com.android.syrenapass.data.entities.AppList
 import com.android.syrenapass.domain.entities.AppDomain
 import javax.inject.Inject
 
@@ -23,7 +23,7 @@ class AppsMapper @Inject constructor(){
         return (ai.flags and mask) != 0
     }
 
-    fun mapDtToDb(appDomain: AppDomain): AppDbModel = AppDbModel(
+    fun mapDtToDatastore(appDomain: AppDomain): AppDatastore = AppDatastore(
         packageName = appDomain.packageName,
         appName = appDomain.appName,
         system = appDomain.system,
@@ -33,14 +33,22 @@ class AppsMapper @Inject constructor(){
         toClearData = appDomain.toClearData
     )
 
-    fun mapDbToDt(context: Context,appDbModel: AppDbModel): AppDomain = AppDomain(
-        packageName = appDbModel.packageName,
-        appName = appDbModel.appName,
-        system = appDbModel.system,
-        enabled = appDbModel.enabled,
-        toHide = appDbModel.toHide,
-        toDelete = appDbModel.toDelete,
-        toClearData = appDbModel.toClearData,
-        icon = context.packageManager.getPackageInfo(appDbModel.packageName, 0).applicationInfo.loadIcon(context.packageManager)
+    fun mapDtListToDatastore(apps: List<AppDomain>): List<AppDatastore> =
+        apps.map { mapDtToDatastore(it) }
+
+
+    fun mapDatastoreToDt(context: Context, appDatastore: AppDatastore): AppDomain = AppDomain(
+        packageName = appDatastore.packageName,
+        appName = appDatastore.appName,
+        system = appDatastore.system,
+        enabled = appDatastore.enabled,
+        toHide = appDatastore.toHide,
+        toDelete = appDatastore.toDelete,
+        toClearData = appDatastore.toClearData,
+        icon = context.packageManager.getPackageInfo(appDatastore.packageName, 0).applicationInfo.loadIcon(context.packageManager)
     )
+
+    fun mapListDatastoreToListDt(context: Context, appList: AppList): List<AppDomain>  =
+        appList.list.map { mapDatastoreToDt(context,it) }
+
 }

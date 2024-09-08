@@ -36,4 +36,5 @@ class AboutFragment: Fragment() {
   private fun setMainActivityState() {
     (activity as MainActivity).setActivityState(ActivityState.NormalActivityState(getString(R.string.about)))
   }
+
 }

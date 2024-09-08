@@ -16,6 +16,7 @@ import com.android.syrenapass.presentation.services.DeviceAdminReceiver
 import com.android.syrenapass.presentation.utils.UIText
 import com.android.syrenapass.superuser.superuser.SuperUser
 import com.android.syrenapass.superuser.superuser.SuperUserException
+import com.topjohnwu.superuser.Shell
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.Executors
 import javax.inject.Inject
@@ -116,9 +117,18 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
         }
     }
 
+    override suspend fun runTrim() {
+        throw SuperUserException(NO_ROOT_RIGHTS,UIText.StringResource(R.string.no_root_rights))
+    }
+
+    override suspend fun executeRootCommand(command: String): Shell.Result {
+        throw SuperUserException(NO_ROOT_RIGHTS,UIText.StringResource(R.string.no_root_rights))
+    }
+
     companion object {
         private const val NO_OWNER_RIGHTS = "App doesn't have owner rights."
         private const val ANDROID_VERSION_INCORRECT = "Wrong android version, SDK version %s or higher required"
+        private const val NO_ROOT_RIGHTS = "App doesn't have root rights"
     }
 
 }

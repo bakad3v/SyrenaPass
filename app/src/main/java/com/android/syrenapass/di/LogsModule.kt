@@ -1,8 +1,6 @@
 package com.android.syrenapass.di
 
-import com.android.syrenapass.SyrenaApp
 import com.android.syrenapass.TopLevelFunctions.getEpochDays
-import com.android.syrenapass.data.db.LogDao
 import com.android.syrenapass.data.repositories.LogsRepositoryImpl
 import com.android.syrenapass.domain.repositories.LogsRepository
 import dagger.Binds
@@ -22,10 +20,6 @@ abstract class LogsModule {
   abstract fun bindLogsRepository(filesRepositoryImpl: LogsRepositoryImpl): LogsRepository
 
   companion object {
-    @Provides
-    @Singleton
-    fun provideLogDao(): LogDao? =
-      SyrenaApp.getDatabase()?.myLogDao()
 
     @Provides
     @Singleton

@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 class Root @Inject constructor(private val profilesMapper: ProfilesMapper, private val setRootInactiveUseCase: SetRootInactiveUseCase) : SuperUser {
 
-    private suspend fun executeRoot(command: String): Shell.Result {
+    override suspend fun executeRootCommand(command: String): Shell.Result {
         val result = Shell.cmd(command).exec()
         if (!result.isSuccess) {
             if (!askSuperUserRights()) {
@@ -27,19 +27,19 @@ class Root @Inject constructor(private val profilesMapper: ProfilesMapper, priva
     }
 
     override suspend fun uninstallApp(packageName: String) {
-        executeRoot("pm uninstall $packageName")
+        executeRootCommand("pm uninstall $packageName")
     }
 
     override suspend fun hideApp(packageName: String) {
-        executeRoot("pm disable $packageName")
+        executeRootCommand("pm disable $packageName")
     }
 
     override suspend fun clearAppData(packageName: String) {
-        executeRoot("pm clear $packageName")
+        executeRootCommand("pm clear $packageName")
     }
 
     override suspend fun removeProfile(id: Int) {
-        executeRoot("pm remove-user $id")
+        executeRootCommand("pm remove-user $id")
     }
 
     fun askSuperUserRights(): Boolean {
@@ -48,12 +48,16 @@ class Root @Inject constructor(private val profilesMapper: ProfilesMapper, priva
     }
 
     override suspend fun wipe() {
-        executeRoot("recovery --wipe_data")
+        executeRootCommand("recovery --wipe_data")
     }
 
     override suspend fun getProfiles(): List<ProfileDomain> {
-        val result = executeRoot("pm list-users")
+        val result = executeRootCommand("pm list-users")
         return result.out.map { profilesMapper.mapRootOutputToProfile(it) }
+    }
+
+    override suspend fun runTrim() {
+        executeRootCommand("sm fstrim")
     }
 
   companion object {

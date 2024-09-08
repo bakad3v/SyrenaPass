@@ -2,6 +2,7 @@ package com.android.syrenapass.presentation.viewmodels
 
 import com.android.syrenapass.domain.usecases.filesDatabase.ClearDbUseCase
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.syrenapass.R
@@ -116,6 +117,7 @@ class UsualFilesSettingsVM @Inject constructor(
 
 
   fun addFileToDb(uri: Uri, isDirectory: Boolean) {
+    Log.w("fileuri",uri.toString())
     viewModelScope.launch {
       insertMyFileUseCase(uri, isDirectory)
     }

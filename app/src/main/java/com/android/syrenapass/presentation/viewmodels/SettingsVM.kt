@@ -6,8 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.android.syrenapass.R
 import com.android.syrenapass.domain.entities.Settings
 import com.android.syrenapass.domain.entities.Theme
-import com.android.syrenapass.domain.usecases.admin.RequestAdminRightsUseCase
-import com.android.syrenapass.domain.usecases.passwordManager.ChangePasswordUseCase
+import com.android.syrenapass.domain.usecases.passwordManager.SetPasswordUseCase
 import com.android.syrenapass.domain.usecases.settings.GetSettingsUseCase
 import com.android.syrenapass.domain.usecases.settings.SetActiveUseCase
 import com.android.syrenapass.domain.usecases.settings.SetInactiveUseCase
@@ -26,11 +25,10 @@ import javax.inject.Inject
 class SettingsVM @Inject constructor(
   getSettingsUseCase: GetSettingsUseCase,
   private val setThemeUseCase: SetThemeUseCase,
-  private val changePasswordUseCase: ChangePasswordUseCase,
+  private val setPasswordUseCase: SetPasswordUseCase,
   private val settingsActionChannel: Channel<DialogActions>,
   private val setInactiveUseCase: SetInactiveUseCase,
   private val setActiveUseCase: SetActiveUseCase,
-  private val requestAdminRightsUseCase: RequestAdminRightsUseCase
 ) : ViewModel() {
 
   val settingsActionsFlow = settingsActionChannel.receiveAsFlow()
@@ -43,7 +41,7 @@ class SettingsVM @Inject constructor(
     )
 
   fun adminRightsIntent(): Intent {
-    return requestAdminRightsUseCase()
+    return Intent()
   }
 
   fun setTheme(theme: Theme) {
@@ -66,7 +64,7 @@ class SettingsVM @Inject constructor(
 
   fun setPassword(password: String) {
     viewModelScope.launch {
-      changePasswordUseCase(password)
+      setPasswordUseCase(password.toCharArray())
     }
   }
 

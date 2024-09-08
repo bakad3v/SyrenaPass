@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class GetAvailableDaysUseCase @Inject constructor(private val repository: LogsRepository) {
-  operator fun invoke(): Flow<List<Long>> {
+  operator fun invoke(): Flow<Set<Long>> {
     return repository.getAvailableDays()
   }
 }

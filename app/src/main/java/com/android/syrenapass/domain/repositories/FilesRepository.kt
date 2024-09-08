@@ -13,6 +13,5 @@ interface FilesRepository {
   suspend fun insertMyFile(uri: Uri, isDirectory: Boolean)
   suspend fun deleteMyFile(uri: Uri)
   fun getFilesDb(): Flow<List<FileDomain>>
-  fun init()
-    fun getSortOrder(): StateFlow<FilesSortOrder>
+  fun getSortOrder(): StateFlow<FilesSortOrder>
 }

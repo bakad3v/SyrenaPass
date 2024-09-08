@@ -2,17 +2,17 @@ package com.android.syrenapass.data.repositories
 
 import android.content.Context
 import android.net.Uri
+import androidx.datastore.dataStore
 import androidx.documentfile.provider.DocumentFile
-import com.android.syrenapass.data.db.FileDao
-import com.android.syrenapass.data.db.FileDbModel
+import com.android.syrenapass.data.entities.FileDatastore
 import com.android.syrenapass.data.mappers.FileMapper
+import com.android.syrenapass.data.serializers.FilesSerializer
 import com.android.syrenapass.domain.entities.FileDomain
 import com.android.syrenapass.domain.entities.FileType
 import com.android.syrenapass.domain.entities.FilesSortOrder
 import com.android.syrenapass.domain.repositories.FilesRepository
 import com.anggrayudi.storage.file.getAbsolutePath
 import com.anggrayudi.storage.file.mimeType
-import dagger.Lazy
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -29,14 +29,15 @@ import javax.inject.Inject
  */
 class FilesRepositoryImpl @Inject constructor(
   @ApplicationContext private val context: Context,
-  private val fileDaoLazy: Lazy<FileDao>,
   private val mapper: FileMapper,
-  private val sortOrderFlow: MutableStateFlow<FilesSortOrder>
+  private val sortOrderFlow: MutableStateFlow<FilesSortOrder>,
+  filesSerializer: FilesSerializer
 ) : FilesRepository {
 
-  private lateinit var fileDao: FileDao
 
   override fun getSortOrder() = sortOrderFlow.asStateFlow()
+
+  private val Context.filesDataStore by dataStore(DATASTORE_NAME,filesSerializer)
 
 
   /**
@@ -44,36 +45,26 @@ class FilesRepositoryImpl @Inject constructor(
    */
   @OptIn(ExperimentalCoroutinesApi::class)
   override fun getFilesDb() : Flow<List<FileDomain>> = sortOrderFlow.flatMapLatest {
-    val filesFlow = when (it) {
-      FilesSortOrder.NAME_ASC -> fileDao.getDataSortedByPathAsc()
-      FilesSortOrder.NAME_DESC -> fileDao.getDataSortedByPathDesc()
-      FilesSortOrder.SIZE_ASC -> fileDao.getDataSortedBySizeAsc()
-      FilesSortOrder.SIZE_DESC -> fileDao.getDataSortedBySizeDesc()
-      FilesSortOrder.PRIORITY_ASC -> fileDao.getDataSortedByPriorityAsc()
-      FilesSortOrder.PRIORITY_DESC -> fileDao.getDataSortedByPriorityDesc()
-    }
-    filesFlow.map { files -> mapper.mapDbListToDtList(files) }
+    context.filesDataStore.data.map { files -> mapper.mapDatastoreListToDtList(files.getSorted(it)) }
   }
 
-  /**
-   * Function for DAO initialization after database unlocking
-   */
-  override fun init() {
-    fileDao = fileDaoLazy.get()
-  }
 
   /**
    * Function to clear database
    */
   override suspend fun clearDb() {
-    fileDao.clearDb()
+    context.filesDataStore.updateData {
+      it.clear()
+    }
   }
 
   /**
    * Function to change priority of file.
    */
   override suspend fun changeFilePriority(priority: Int, uri: Uri) {
-    fileDao.changePriority(priority, uri.toString())
+    context.filesDataStore.updateData {
+      it.changePriority(uri.toString(),priority)
+    }
   }
 
   /**
@@ -137,14 +128,23 @@ class FilesRepositoryImpl @Inject constructor(
         FileType.USUAL_FILE
       }
     }
-    fileDao.upsert(FileDbModel(uri = uri.toString(), name = df.name?:"No name",size = size, priority = 0, fileType = fileType, sizeFormatted = size.convertToHumanFormat()))
+    context.filesDataStore.updateData {
+      it.add(FileDatastore(uri = uri.toString(), name = df.name?:"No name",size = size, priority = 0, fileType = fileType, sizeFormatted = size.convertToHumanFormat()))
+    }
   }
 
   /**
    * Function to delete file
    */
   override suspend fun deleteMyFile(uri: Uri) {
-    fileDao.delete(uri.toString())
+    context.filesDataStore.updateData {
+      it.delete(uri.toString())
+    }
+  }
+
+  companion object {
+    private const val DATASTORE_NAME = "files_datastore.json"
+
   }
 
 }

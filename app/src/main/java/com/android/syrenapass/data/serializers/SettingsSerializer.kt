@@ -1,6 +1,8 @@
 package com.android.syrenapass.data.serializers
 
 import androidx.datastore.core.Serializer
+import com.android.syrenapass.data.encryption.EncryptionAlias
+import com.android.syrenapass.data.encryption.EncryptionManager
 import com.android.syrenapass.domain.entities.Settings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -8,17 +10,19 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import java.io.InputStream
 import java.io.OutputStream
+import javax.inject.Inject
 
-object SettingsSerializer: Serializer<Settings> {
+class SettingsSerializer @Inject constructor(private val encryptionManager: EncryptionManager): Serializer<Settings> {
 
   override val defaultValue: Settings
     get() = Settings()
 
 
   override suspend fun readFrom(input: InputStream): Settings {
+    val decryptedBytes = encryptionManager.decrypt(EncryptionAlias.DATASTORE.name,input)
     return try {
       Json.decodeFromString(deserializer = Settings.serializer(),
-        string = input.readBytes().decodeToString())
+        string = decryptedBytes.decodeToString())
     } catch (e: SerializationException) {
       defaultValue
     }
@@ -26,11 +30,13 @@ object SettingsSerializer: Serializer<Settings> {
 
   override suspend fun writeTo(t: Settings, output: OutputStream) {
     withContext(Dispatchers.IO) {
-      output.write(
+      encryptionManager.encrypt(
+        EncryptionAlias.DATASTORE.name,
         Json.encodeToString(
           serializer = Settings.serializer(),
           value = t
-        ).encodeToByteArray()
+        ).encodeToByteArray(),
+        output
       )
     }
   }
