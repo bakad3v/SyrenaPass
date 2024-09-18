@@ -46,7 +46,7 @@ import kotlinx.coroutines.SupervisorJob
  * @return a property delegate that manages a datastore as a singleton.
  */
 @Suppress("MissingJvmstatic")
-public fun preferencesDataStoreDirectBootAware(
+fun preferencesDataStoreDirectBootAware(
     name: String,
     corruptionHandler: ReplaceFileCorruptionHandler<Preferences>? = null,
     produceMigrations: (Context) -> List<DataMigration<Preferences>> = { listOf() },

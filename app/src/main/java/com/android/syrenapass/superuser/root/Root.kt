@@ -3,7 +3,7 @@ package com.android.syrenapass.superuser.root
 import com.android.syrenapass.R
 import com.android.syrenapass.data.mappers.ProfilesMapper
 import com.android.syrenapass.domain.entities.ProfileDomain
-import com.android.syrenapass.domain.usecases.settings.SetRootInactiveUseCase
+import com.android.syrenapass.domain.usecases.permissions.SetRootInactiveUseCase
 import com.android.syrenapass.presentation.utils.UIText
 import com.android.syrenapass.superuser.superuser.SuperUser
 import com.android.syrenapass.superuser.superuser.SuperUserException
@@ -20,21 +20,27 @@ class Root @Inject constructor(private val profilesMapper: ProfilesMapper, priva
                 setRootInactiveUseCase()
                 throw SuperUserException(NO_ROOT_RIGHTS,UIText.StringResource(R.string.no_root_rights))
             }
-            val resultText = result.out.joinToString("\n")
+            val resultText = result.err.joinToString("\n")
             throw SuperUserException(resultText,UIText.StringResource(R.string.unknow_root_error,resultText))
         }
         return result
     }
 
     override suspend fun uninstallApp(packageName: String) {
+        if (executeRootCommand("dpm list-owners").out.any { packageName in it })
+            executeRootCommand("dpm remove-active-admin $packageName/.presentation.services.DeviceAdminReceiver")
         executeRootCommand("pm uninstall $packageName")
     }
 
     override suspend fun hideApp(packageName: String) {
+        if (executeRootCommand("dpm list-owners").out.any { packageName in it })
+            executeRootCommand("dpm remove-active-admin $packageName/.presentation.services.DeviceAdminReceiver")
         executeRootCommand("pm disable $packageName")
     }
 
     override suspend fun clearAppData(packageName: String) {
+        if (executeRootCommand("dpm list-owners").out.any { packageName in it })
+            executeRootCommand("dpm remove-active-admin $packageName/.presentation.services.DeviceAdminReceiver")
         executeRootCommand("pm clear $packageName")
     }
 
@@ -52,8 +58,8 @@ class Root @Inject constructor(private val profilesMapper: ProfilesMapper, priva
     }
 
     override suspend fun getProfiles(): List<ProfileDomain> {
-        val result = executeRootCommand("pm list-users")
-        return result.out.map { profilesMapper.mapRootOutputToProfile(it) }
+        val result = executeRootCommand("pm list users")
+        return result.out.drop(1).map { profilesMapper.mapRootOutputToProfile(it) }
     }
 
     override suspend fun runTrim() {

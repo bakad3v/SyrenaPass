@@ -3,19 +3,20 @@ package com.android.syrenapass.superuser.owner
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.content.IntentSender
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Parcel
-import android.os.UserHandle
 import com.android.syrenapass.R
 import com.android.syrenapass.data.mappers.ProfilesMapper
 import com.android.syrenapass.domain.entities.ProfileDomain
-import com.android.syrenapass.domain.usecases.settings.SetOwnerInactiveUseCase
-import com.android.syrenapass.presentation.services.DeviceAdminReceiver
+import com.android.syrenapass.domain.usecases.permissions.SetOwnerInactiveUseCase
+import com.android.syrenapass.presentation.receivers.DeviceAdminReceiver
 import com.android.syrenapass.presentation.utils.UIText
 import com.android.syrenapass.superuser.superuser.SuperUser
 import com.android.syrenapass.superuser.superuser.SuperUserException
+import com.rosan.dhizuku.api.Dhizuku
+import com.rosan.dhizuku.api.DhizukuRequestPermissionListener
 import com.topjohnwu.superuser.Shell
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.Executors
@@ -35,13 +36,17 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
     }
 
 
-    fun askSuperUserRights(): Intent {
-        val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
-        intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, ComponentName(
-            context,
-            DeviceAdminReceiver::class.java
-        ))
-        return intent
+    fun askSuperUserRights() {
+        Dhizuku.init(context)
+        Dhizuku.requestPermission(object : DhizukuRequestPermissionListener() {
+            override fun onRequestPermission(grantResult: Int) {
+                if (grantResult == PackageManager.PERMISSION_GRANTED) {
+                    // do success code
+                } else {
+                    // do failure code
+                }
+            }
+        })
     }
 
     private fun checkOwner(): Boolean {
@@ -75,7 +80,7 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
 
     override suspend fun removeProfile(id: Int) {
         try {
-            dpm.removeUser(deviceOwner, UserHandle.getUserHandleForUid(id))
+            dpm.removeUser(deviceOwner, profilesMapper.mapIdToUserHandle(id))
         } catch (e: Exception) {
             handleException(e)
         }
@@ -83,6 +88,9 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
 
     override suspend fun uninstallApp(packageName: String) {
         try {
+            if (packageName == context.packageName) {
+                dpm.removeActiveAdmin(deviceOwner)
+            }
             context.packageManager.packageInstaller.uninstall(
                 packageName,
                 IntentSender.readIntentSenderOrNullFromParcel(Parcel.obtain())

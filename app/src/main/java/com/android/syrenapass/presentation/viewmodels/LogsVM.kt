@@ -71,7 +71,7 @@ class LogsVM @Inject constructor(
   }
 
   fun changeAutoDeletionTimeout(timeout: Int) {
-    viewModelScope.launch(Dispatchers.IO) {
+    viewModelScope.launch {
       changeAutoDeletionTimeOutUseCase(timeout)
     }
   }

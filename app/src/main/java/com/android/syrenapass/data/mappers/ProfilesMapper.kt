@@ -2,8 +2,10 @@ package com.android.syrenapass.data.mappers
 
 import android.content.Context
 import android.content.Context.USER_SERVICE
+import android.os.Parcel
 import android.os.UserHandle
 import android.os.UserManager
+import android.util.Log
 import com.android.syrenapass.domain.entities.ProfileDomain
 import javax.inject.Inject
 
@@ -16,7 +18,17 @@ class ProfilesMapper @Inject constructor() {
         return ProfileDomain(id,"Unknown name",main)
     }
 
+    fun mapIdToUserHandle(id: Int): UserHandle {
+        val parcel = Parcel.obtain()
+        parcel.writeInt(id)
+        parcel.setDataPosition(0)
+        val user = UserHandle.readFromParcel(parcel)
+        parcel.recycle()
+        return user
+    }
+
     fun mapRootOutputToProfile(output: String) : ProfileDomain {
+        Log.w("output",output)
         val info = output.split("{")[1].split(":")
         val id = info[0].toInt()
         val name = info[1]

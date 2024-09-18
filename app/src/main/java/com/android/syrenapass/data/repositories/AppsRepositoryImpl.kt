@@ -1,24 +1,34 @@
 package com.android.syrenapass.data.repositories
 
 import android.content.Context
-import androidx.datastore.dataStore
+import android.content.pm.PackageManager
 import com.android.syrenapass.data.mappers.AppsMapper
 import com.android.syrenapass.data.serializers.AppsSerializer
+import com.android.syrenapass.datastoreDBA.dataStoreDirectBootAware
 import com.android.syrenapass.domain.entities.AppDomain
 import com.android.syrenapass.domain.repositories.AppsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class AppsRepositoryImpl @Inject constructor(@ApplicationContext private val context: Context, private val appsMapper: AppsMapper, appsSerializer: AppsSerializer): AppsRepository {
+class AppsRepositoryImpl @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val appsMapper: AppsMapper,
+    appsSerializer: AppsSerializer
+) : AppsRepository {
 
-    private val Context.appsDatastore by dataStore(DATASTORE_NAME,appsSerializer)
+    private val Context.appsDatastore by dataStoreDirectBootAware(DATASTORE_NAME, appsSerializer)
 
-    override fun getManagedApps() : Flow<List<AppDomain>> = context.appsDatastore.data.map { appsMapper.mapListDatastoreToListDt(context,it) }
+    override fun getManagedApps(): Flow<List<AppDomain>> =
+        context.appsDatastore.data.map { appsMapper.mapListDatastoreToListDt(context, it) }
 
     override fun getInstalledApplications(): List<AppDomain> {
-        val installedApps: List<AppDomain> = context.packageManager.getInstalledPackages(0).map{ appsMapper.mapPackageInfoToAppDT(context,it)}
+        val installedApps: List<AppDomain> = context.packageManager.getInstalledPackages(
+            PackageManager.GET_META_DATA
+        ).map { appsMapper.mapPackageInfoToAppDT(context, it) }
         return installedApps
     }
 
@@ -53,7 +63,7 @@ class AppsRepositoryImpl @Inject constructor(@ApplicationContext private val con
     }
 
     override suspend fun clearDb() {
-        context.appsDatastore.updateData {  it.clear() }
+        context.appsDatastore.updateData { it.clear() }
     }
 
     companion object {

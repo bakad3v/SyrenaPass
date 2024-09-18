@@ -7,8 +7,8 @@ import android.content.Intent
 import android.os.Build
 import com.android.syrenapass.R
 import com.android.syrenapass.domain.entities.ProfileDomain
-import com.android.syrenapass.domain.usecases.settings.SetAdminInactiveUseCase
-import com.android.syrenapass.presentation.services.DeviceAdminReceiver
+import com.android.syrenapass.domain.usecases.permissions.SetAdminInactiveUseCase
+import com.android.syrenapass.presentation.receivers.DeviceAdminReceiver
 import com.android.syrenapass.presentation.utils.UIText
 import com.android.syrenapass.superuser.superuser.SuperUser
 import com.android.syrenapass.superuser.superuser.SuperUserException

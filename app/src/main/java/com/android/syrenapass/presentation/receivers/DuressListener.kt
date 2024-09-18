@@ -1,16 +1,17 @@
-package com.android.syrenapass.presentation.services
+package com.android.syrenapass.presentation.receivers
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 
 /**
  * Class for receiving broadcast from Duress
  */
 class DuressListener: BroadcastReceiver() {
   override fun onReceive(context: Context?, intent: Intent?) {
-    if (intent!!.action==ACTION) {
-      DeleteFilesService.start(context!!)
+    if (intent!!.action== ACTION) {
+      Log.w("receiver","usb wasted")
     }
   }
 

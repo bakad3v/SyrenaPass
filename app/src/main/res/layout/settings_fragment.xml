@@ -23,22 +23,39 @@
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent">
 
+      <LinearLayout
+          android:id="@+id/general_settings"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="start"
+          android:orientation="horizontal"
+          android:paddingTop="16dp">
+
+        <com.google.android.material.textview.MaterialTextView
+            style="?attr/textAppearanceSubtitle1"
+            android:textStyle="bold"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:text="@string/general_settings">
+        </com.google.android.material.textview.MaterialTextView>
+      </LinearLayout>
 
       <LinearLayout
         android:id="@+id/select_theme"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="start"
-        android:orientation="horizontal"
-        android:paddingTop="16dp">
+        android:orientation="horizontal">
 
         <com.google.android.material.textview.MaterialTextView
           style="?attr/textAppearanceTitleLarge"
           android:layout_width="0dp"
           android:layout_height="wrap_content"
           android:layout_weight="1"
-          android:paddingStart="8dp"
-          android:paddingEnd="8dp"
+          android:padding="8dp"
           android:text="@string/theme">
 
         </com.google.android.material.textview.MaterialTextView>
@@ -64,52 +81,356 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="start"
-        android:orientation="horizontal"
-        android:paddingTop="16dp">
+        android:orientation="horizontal">
 
         <com.google.android.material.textview.MaterialTextView
           style="?attr/textAppearanceTitleLarge"
           android:layout_width="0dp"
           android:layout_height="wrap_content"
           android:layout_weight="1"
-          android:paddingStart="8dp"
-          android:paddingEnd="8dp"
+          android:padding="8dp"
           android:text="@string/change_password">
         </com.google.android.material.textview.MaterialTextView>
       </LinearLayout>
 
-      <Space
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-      <com.google.android.material.button.MaterialButton
-        android:id="@+id/grant_admin_rights"
-        style="@style/Widget.Material3.Button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:text="@string/grant_admin_rights">
-      </com.google.android.material.button.MaterialButton>
-      <com.google.android.material.button.MaterialButton
-        android:id="@+id/start_accessibility_service"
-        style="@style/Widget.Material3.Button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:text="@string/start_accessibility_service"
-        app:runningService="@{viewmodel.settingsState}">
-      </com.google.android.material.button.MaterialButton>
-      <com.google.android.material.button.MaterialButton
-        android:id="@+id/change_deletion_status"
-        style="@style/Widget.Material3.Button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:text="@string/enable_files_deletion"
-        app:buttonActivationStatus="@{viewmodel.settingsState}">
 
-      </com.google.android.material.button.MaterialButton>
+      <View
+          android:id="@+id/divider"
+          android:layout_width="match_parent"
+          android:layout_height="3dp"
+          android:background="?android:attr/listDivider" />
 
+      <LinearLayout
+          android:id="@+id/actions_settings"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="start"
+          android:orientation="horizontal"
+          android:paddingTop="8dp">
+
+        <com.google.android.material.textview.MaterialTextView
+            style="?attr/textAppearanceSubtitle1"
+            android:textStyle="bold"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:text="@string/actions_settings">
+        </com.google.android.material.textview.MaterialTextView>
+      </LinearLayout>
+
+      <LinearLayout
+          android:id="@+id/run_trim"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="start"
+          android:orientation="horizontal">
+
+        <com.google.android.material.textview.MaterialTextView
+            style="?attr/textAppearanceTitleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:paddingEnd="0dp"
+            android:text="@string/run_trim">
+        </com.google.android.material.textview.MaterialTextView>
+        <com.google.android.material.textview.MaterialTextView
+            style="?attr/textAppearanceLabelLarge"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="8dp"
+            android:text="@string/root_only">
+        </com.google.android.material.textview.MaterialTextView>
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            />
+      </LinearLayout>
+      <LinearLayout
+          android:id="@+id/wipe_data"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="start"
+          android:orientation="horizontal">
+
+        <com.google.android.material.textview.MaterialTextView
+            style="?attr/textAppearanceTitleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:paddingEnd="0dp"
+            android:text="@string/wipe_data">
+        </com.google.android.material.textview.MaterialTextView>
+        <com.google.android.material.textview.MaterialTextView
+            style="?attr/textAppearanceLabelLarge"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="8dp"
+            android:text="@string/all_superusers">
+        </com.google.android.material.textview.MaterialTextView>
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            />
+      </LinearLayout>
+      <LinearLayout
+          android:id="@+id/remove_itself"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="start"
+          android:orientation="horizontal">
+
+        <com.google.android.material.textview.MaterialTextView
+            style="?attr/textAppearanceTitleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:paddingEnd="0dp"
+            android:text="@string/remove_itself">
+        </com.google.android.material.textview.MaterialTextView>
+        <com.google.android.material.textview.MaterialTextView
+            style="?attr/textAppearanceLabelLarge"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="8dp"
+            android:text="@string/root_and_owner">
+        </com.google.android.material.textview.MaterialTextView>
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            />
+      </LinearLayout>
+
+      <View
+          android:id="@+id/divider2"
+          android:layout_width="match_parent"
+          android:layout_height="3dp"
+          android:background="?android:attr/listDivider" />
+
+      <LinearLayout
+          android:id="@+id/permissions"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="start"
+          android:orientation="horizontal"
+          android:paddingTop="8dp">
+
+        <com.google.android.material.textview.MaterialTextView
+            style="?attr/textAppearanceSubtitle1"
+            android:textStyle="bold"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:text="@string/permissions">
+        </com.google.android.material.textview.MaterialTextView>
+      </LinearLayout>
+      <LinearLayout
+          android:id="@+id/admin_rights"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="start"
+          android:orientation="horizontal">
+
+        <com.google.android.material.textview.MaterialTextView
+            style="?attr/textAppearanceTitleLarge"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="8dp"
+            android:text="@string/admin_rights">
+        </com.google.android.material.textview.MaterialTextView>
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            />
+      </LinearLayout>
+      <LinearLayout
+          android:id="@+id/device_owner"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="start"
+          android:orientation="horizontal">
+
+        <com.google.android.material.textview.MaterialTextView
+            style="?attr/textAppearanceTitleLarge"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="8dp"
+            android:text="@string/device_owner">
+        </com.google.android.material.textview.MaterialTextView>
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            />
+      </LinearLayout>
+      <LinearLayout
+          android:id="@+id/root"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="start"
+          android:orientation="horizontal">
+
+        <com.google.android.material.textview.MaterialTextView
+            style="?attr/textAppearanceTitleLarge"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="8dp"
+            android:text="@string/root">
+        </com.google.android.material.textview.MaterialTextView>
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            />
+      </LinearLayout>
+      <LinearLayout
+          android:id="@+id/accessibility_service"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="start"
+          android:orientation="horizontal">
+
+        <com.google.android.material.textview.MaterialTextView
+            style="?attr/textAppearanceTitleLarge"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="8dp"
+            android:text="@string/accessibility_service">
+        </com.google.android.material.textview.MaterialTextView>
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            />
+      </LinearLayout>
+      <View
+          android:id="@+id/divider3"
+          android:layout_width="match_parent"
+          android:layout_height="3dp"
+          android:background="?android:attr/listDivider" />
+    <LinearLayout
+        android:id="@+id/usb"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:orientation="horizontal"
+        android:paddingTop="8dp">
+
+      <com.google.android.material.textview.MaterialTextView
+          style="?attr/textAppearanceSubtitle1"
+          android:textStyle="bold"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:paddingStart="8dp"
+          android:paddingEnd="8dp"
+          android:text="@string/usb_settings">
+      </com.google.android.material.textview.MaterialTextView>
+    </LinearLayout>
+      <LinearLayout
+          android:id="@+id/run_on_connection"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="start"
+          android:orientation="horizontal">
+
+        <com.google.android.material.textview.MaterialTextView
+            style="?attr/textAppearanceTitleLarge"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="8dp"
+            android:text="@string/run_on_connection">
+        </com.google.android.material.textview.MaterialTextView>
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            />
+      </LinearLayout>
+      <View
+          android:id="@+id/divider4"
+          android:layout_width="match_parent"
+          android:layout_height="3dp"
+          android:background="?android:attr/listDivider" />
+      <LinearLayout
+          android:id="@+id/bruteforce"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="start"
+          android:orientation="horizontal"
+          android:paddingTop="8dp">
+
+        <com.google.android.material.textview.MaterialTextView
+            style="?attr/textAppearanceSubtitle1"
+            android:textStyle="bold"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:text="@string/bruteforce_defense">
+        </com.google.android.material.textview.MaterialTextView>
+      </LinearLayout>
+      <LinearLayout
+          android:id="@+id/prevent_bruteforce"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="start"
+          android:orientation="horizontal">
+
+        <com.google.android.material.textview.MaterialTextView
+            style="?attr/textAppearanceTitleLarge"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="8dp"
+            android:text="@string/prevent_bruteforce">
+        </com.google.android.material.textview.MaterialTextView>
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            />
+      </LinearLayout>
+      <LinearLayout
+          android:id="@+id/allowed_attempts"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="start"
+          android:orientation="vertical">
+
+        <com.google.android.material.textview.MaterialTextView
+            style="?attr/textAppearanceTitleLarge"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:paddingRight="8dp"
+            android:paddingLeft="8dp"
+            android:text="@string/allowed_attempts">
+        </com.google.android.material.textview.MaterialTextView>
+        <com.google.android.material.textview.MaterialTextView
+            style="?attr/textAppearanceBodyMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="@string/password_attempts_number">
+        </com.google.android.material.textview.MaterialTextView>
+      </LinearLayout>
     </LinearLayout>
 
   </androidx.constraintlayout.widget.ConstraintLayout>

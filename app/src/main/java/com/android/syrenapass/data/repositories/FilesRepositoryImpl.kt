@@ -7,6 +7,7 @@ import androidx.documentfile.provider.DocumentFile
 import com.android.syrenapass.data.entities.FileDatastore
 import com.android.syrenapass.data.mappers.FileMapper
 import com.android.syrenapass.data.serializers.FilesSerializer
+import com.android.syrenapass.datastoreDBA.dataStoreDirectBootAware
 import com.android.syrenapass.domain.entities.FileDomain
 import com.android.syrenapass.domain.entities.FileType
 import com.android.syrenapass.domain.entities.FilesSortOrder

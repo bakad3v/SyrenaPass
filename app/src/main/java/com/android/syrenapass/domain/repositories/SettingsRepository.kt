@@ -8,10 +8,6 @@ interface SettingsRepository {
   val settings: Flow<Settings>
 
   suspend fun setTheme(theme: Theme)
-  suspend fun setActive()
-  suspend fun setInactive()
   suspend fun setServiceStatus(working: Boolean)
-  suspend fun setAdminStatus(status: Boolean)
-  suspend fun setOwnerStatus(status: Boolean)
-  suspend fun setRootStatus(status: Boolean)
+  suspend fun setRunOnBoot(status: Boolean)
 }

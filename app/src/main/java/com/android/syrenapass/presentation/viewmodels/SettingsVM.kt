@@ -8,8 +8,6 @@ import com.android.syrenapass.domain.entities.Settings
 import com.android.syrenapass.domain.entities.Theme
 import com.android.syrenapass.domain.usecases.passwordManager.SetPasswordUseCase
 import com.android.syrenapass.domain.usecases.settings.GetSettingsUseCase
-import com.android.syrenapass.domain.usecases.settings.SetActiveUseCase
-import com.android.syrenapass.domain.usecases.settings.SetInactiveUseCase
 import com.android.syrenapass.domain.usecases.settings.SetThemeUseCase
 import com.android.syrenapass.presentation.actions.DialogActions
 import com.android.syrenapass.presentation.utils.UIText
@@ -27,8 +25,6 @@ class SettingsVM @Inject constructor(
   private val setThemeUseCase: SetThemeUseCase,
   private val setPasswordUseCase: SetPasswordUseCase,
   private val settingsActionChannel: Channel<DialogActions>,
-  private val setInactiveUseCase: SetInactiveUseCase,
-  private val setActiveUseCase: SetActiveUseCase,
 ) : ViewModel() {
 
   val settingsActionsFlow = settingsActionChannel.receiveAsFlow()
@@ -65,22 +61,6 @@ class SettingsVM @Inject constructor(
   fun setPassword(password: String) {
     viewModelScope.launch {
       setPasswordUseCase(password.toCharArray())
-    }
-  }
-
-  fun changeDeletionState() {
-    viewModelScope.launch {
-      if (settingsState.value.active) {
-        setInactiveUseCase()
-      } else {
-        showConfirmationDialog()
-      }
-    }
-  }
-
-  fun setActive() {
-    viewModelScope.launch {
-      setActiveUseCase()
     }
   }
 

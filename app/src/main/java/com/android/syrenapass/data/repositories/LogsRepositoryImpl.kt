@@ -100,9 +100,6 @@ class LogsRepositoryImpl @Inject constructor(
   }
 
   override suspend fun writeToLogs(string: String) {
-    if (!context.logsDataDataStore.data.first().logsEnabled) {
-      return
-    }
     val dateTime = LocalDateTime.now()
     val date = dateTime.getMillis()
     val day = dateTime.getEpochDays()

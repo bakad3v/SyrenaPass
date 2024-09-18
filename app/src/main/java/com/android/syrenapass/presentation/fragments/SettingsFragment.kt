@@ -1,11 +1,8 @@
 package com.android.syrenapass.presentation.fragments
 
 import android.app.admin.DevicePolicyManager
-import android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE
-import android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME
 import android.content.ComponentName
 import android.content.Intent
-import android.icu.lang.UCharacter.GraphemeClusterBreak.L
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -17,7 +14,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -30,7 +26,7 @@ import com.android.syrenapass.presentation.activities.MainActivity
 import com.android.syrenapass.presentation.dialogs.DialogLauncher
 import com.android.syrenapass.presentation.dialogs.PasswordInputDialog
 import com.android.syrenapass.presentation.dialogs.QuestionDialog
-import com.android.syrenapass.presentation.services.DeviceAdminReceiver
+import com.android.syrenapass.presentation.receivers.DeviceAdminReceiver
 import com.android.syrenapass.presentation.states.ActivityState
 import com.android.syrenapass.presentation.viewmodels.SettingsVM
 import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.CONFIRM_AUTODELETION_REQUEST
@@ -104,21 +100,18 @@ class SettingsFragment : Fragment() {
     binding.setupPassword.setOnClickListener {
       viewModel.showPasswordInput()
     }
-    binding.changeDeletionStatus.setOnClickListener {
-      viewModel.changeDeletionState()
-    }
-    binding.startAccessibilityService.setOnClickListener {
-      viewModel.showAccessibilityServiceDialog()
-    }
-    binding.grantAdminRights.setOnClickListener {
-      // viewModel.showDeviceAdminRightsDialog()
-      val dpm = requireContext().getSystemService(DevicePolicyManager::class.java)
-      val deviceAdmin by lazy { ComponentName(requireContext(), DeviceAdminReceiver::class.java) }
-      Log.w("dpm",dpm.isDeviceOwnerApp("com.android.syrenapass").toString())
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-        Log.w("dpm",dpm.isAffiliatedUser.toString())
-      }
-    }
+//    binding.startAccessibilityService.setOnClickListener {
+//      viewModel.showAccessibilityServiceDialog()
+//    }
+//    binding.grantAdminRights.setOnClickListener {
+//      // viewModel.showDeviceAdminRightsDialog()
+//      val dpm = requireContext().getSystemService(DevicePolicyManager::class.java)
+//      val deviceAdmin by lazy { ComponentName(requireContext(), DeviceAdminReceiver::class.java) }
+//      Log.w("dpm",dpm.isDeviceOwnerApp("com.android.syrenapass").toString())
+//      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+//        Log.w("dpm",dpm.isAffiliatedUser.toString())
+//      }
+//    }
   }
 
 
@@ -137,13 +130,6 @@ class SettingsFragment : Fragment() {
       viewLifecycleOwner
     ) {
       viewModel.setPassword(it)
-    }
-    QuestionDialog.setupListener(
-      parentFragmentManager,
-      CONFIRM_AUTODELETION_REQUEST,
-      viewLifecycleOwner
-    ) {
-      viewModel.setActive()
     }
     QuestionDialog.setupListener(
       parentFragmentManager,
