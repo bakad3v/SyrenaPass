@@ -3,9 +3,6 @@ package com.android.syrenapass.data.serializers
 import androidx.datastore.core.Serializer
 import com.android.syrenapass.data.encryption.EncryptionAlias
 import com.android.syrenapass.data.encryption.EncryptionManager
-import com.android.syrenapass.data.entities.FilesList
-import com.android.syrenapass.domain.entities.ProfilesList
-import com.android.syrenapass.domain.entities.Settings
 import com.android.syrenapass.domain.entities.UsbSettings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

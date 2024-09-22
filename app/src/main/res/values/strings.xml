@@ -85,7 +85,7 @@
   <string name="accessibility_service_long"><![CDATA[This app requires accessibility service to read your password input and recognise decoy password. Click \"ok\" and go to \"Installed Services>SyrenaPass\" if you want to enable/disable accessibility service.]]></string>
   <string name="accessibility_service_title">Open accessibility service settings</string>
   <string name="admin_settings_title">Open admin settings</string>
-  <string name="admin_settings_long"><![CDATA[<p>This application needs admin rights to be able to:</p><ul><li>Delete users</li><li>Wipe device data</li><li>Hide applications</li><li>Delete users data</li></ul><p>Press "ok" and then press "Activate" to grant this application admin rights.</p>]]></string>
+  <string name="admin_settings_long"><![CDATA[<p>This application needs admin rights to be able to:</p><ul><li>Wipe device data</li><li>Observe wrong password attempts</li></ul><p>Press "ok" and then press "Activate" to grant this application admin rights.</p>]]></string>
   <string name="device_admin_error">Device admin rights are not enough to perform operations.</string>
   <string name="no_admin_rights">App doesn\'t have admin rights.</string>
   <string name="unknow_admin_error">Device admin action failed for some reason: %1$s</string>
@@ -102,7 +102,7 @@
   <string name="remove_itself">Remove itself</string>
   <string name="root_only">(root only)</string>
   <string name="all_superusers">(all superusers)</string>
-  <string name="root_and_owner">(root/device owner)</string>
+  <string name="root_and_owner">(root/dhizuku)</string>
   <string name="permissions">Permissions settings</string>
   <string name="admin_rights">Admin rights</string>
   <string name="device_owner">Dhizuku</string>
@@ -141,5 +141,21 @@
   <string name="uninstalling_itself">App uninstalling itself. Goodbye...</string>
   <string name="uninstallation_complete">Unreachable</string>
   <string name="uninstallation_failed">Self-destruction failed: %1$s</string>
-
+  <string name="admin_required">(admin rights)</string>
+  <string name="trim_long"><![CDATA[After completion of all operations app will run <a href="https://en.wikipedia.org/wiki/Trim_(computing)">TRIM command</a> and tell the drive about all areas of data are no longer being used and therefore can be erased. Requires root rights.]]></string>
+  <string name="wipe_long">App will wipe all user\'s data or all data on phone if called from main user.</string>
+  <string name="self_destruct_long">App will destroy itself after ending of all operations. Requires root rights or Dhizuku permission.</string>
+  <string name="run_on_usb_connection_long">App will start to destroy data when usb device or usb accessory connected. You must disable this option if you want to connect any USB device without losing data!</string>
+  <string name="bruteforce_defence_long">After reaching maximum number of wrong password attempts (default: 10), app will start to destroy your data.</string>
+  <string name="disable_root_long">Visit your root manager to revoke root rights for this app</string>
+  <string name="disable_root">Disable root rights</string>
+    <string name="not_delete">Do not delete</string>
+    <string name="profiles_faq">There you can select profiles for deletion or create new ones</string>
+  <string name="profiles">Profiles</string>
+  <string name="refresh_profiles">Refresh profiles</string>
+  <string name="add_profile">Add profile</string>
+  <string name="enable_profile_deletion">Enable profile deletion</string>
+  <string name="disable_profile_deletion">Disable profile deletion</string>
+  <string name="profiles_deletion_settings">Profiles deletion settings</string>
+  <string name="enable_profile_deletion_long">All profiles marked for deletion will be eleted after entering of duress password</string>
 </resources>

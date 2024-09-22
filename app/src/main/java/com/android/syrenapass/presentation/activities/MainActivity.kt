@@ -69,6 +69,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.setupFilesFragment,
                 R.id.logsFragment,
                 R.id.settingsFragment,
+                R.id.profilesFragment,
                 R.id.aboutFragment
             ), mainBinding.drawer
         )

@@ -78,15 +78,12 @@ class LogsVM @Inject constructor(
 
   fun changeLogsEnabledQuestion() {
     viewModelScope.launch {
-      val title: Int
-      val text: Int
       if (logsEnabled.value) {
-        title = R.string.disable_logs
-        text = R.string.disable_logs_long
-      } else {
-        title = R.string.enable_logs
-        text = R.string.enable_logs_long
+        changeLogsEnabled()
+        return@launch
       }
+      val title = R.string.enable_logs
+      val text = R.string.enable_logs_long
       logsActionsChannel.send(
         LogsActions.ShowUsualDialog(
           DialogActions.ShowQuestionDialog(

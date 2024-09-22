@@ -14,6 +14,8 @@ import com.android.syrenapass.domain.usecases.filesDatabase.DeleteMyFileUseCase
 import com.android.syrenapass.domain.usecases.filesDatabase.GetFilesDbUseCase
 import com.android.syrenapass.domain.usecases.filesDatabase.GetSortOrderUseCase
 import com.android.syrenapass.domain.usecases.filesDatabase.InsertMyFileUseCase
+import com.android.syrenapass.domain.usecases.settings.GetSettingsUseCase
+import com.android.syrenapass.domain.usecases.settings.SetDeleteFilesUseCase
 import com.android.syrenapass.presentation.states.DeletionDataState
 import com.android.syrenapass.presentation.utils.UIText
 import com.android.syrenapass.presentation.actions.FileSettingsAction
@@ -36,11 +38,19 @@ class UsualFilesSettingsVM @Inject constructor(
   private val changeSortOrderUseCase: ChangeSortOrderUseCase,
   private val clearDbUseCase: ClearDbUseCase,
   private val deletionSettingsActionChannel: Channel<FileSettingsAction>,
-  getSortOrderUseCase: GetSortOrderUseCase
+  private val setDeleteFilesUseCase: SetDeleteFilesUseCase,
+  getSortOrderUseCase: GetSortOrderUseCase,
+  getSettingsUseCase: GetSettingsUseCase
 ) : ViewModel() {
   val deletionSettingsActionFlow = deletionSettingsActionChannel.receiveAsFlow()
 
   val sortOrderFlow = getSortOrderUseCase()
+
+  val isFileDeletionEnabled = getSettingsUseCase().map { it.deleteFiles }.stateIn(
+    viewModelScope,
+    SharingStarted.WhileSubscribed(5000),
+    false
+  )
 
   val autoDeletionDataState =
     getFilesDbUseCase().map { DeletionDataState.ViewData(it) }
@@ -142,8 +152,35 @@ class UsualFilesSettingsVM @Inject constructor(
     }
   }
 
+  fun changeFilesDeletionEnabled() {
+    viewModelScope.launch {
+      if (isFileDeletionEnabled.value) {
+        changeDeletionEnabled()
+        return@launch
+      }
+      deletionSettingsActionChannel.send(
+        FileSettingsAction.ShowUsualDialog(
+          DialogActions.ShowQuestionDialog(
+            UIText.StringResource(R.string.enable_files_deletion),
+            UIText.StringResource(R.string.enable_deletion_long),
+            CHANGE_FILES_DELETION_REQUEST
+          )
+        )
+      )
+
+    }
+  }
+
+  fun changeDeletionEnabled() {
+    viewModelScope.launch {
+      setDeleteFilesUseCase(!isFileDeletionEnabled.value)
+    }
+  }
+
+
   companion object {
     const val CONFIRM_CLEAR_REQUEST = "confirm_clear_request"
+    const val CHANGE_FILES_DELETION_REQUEST = "change_files_deletion_request"
   }
 
 }

@@ -22,4 +22,8 @@
   <fragment
     android:id="@+id/settingsFragment"
     android:name="com.android.syrenapass.presentation.fragments.SettingsFragment" />
+  <fragment
+      android:id="@+id/profilesFragment"
+      android:name="com.android.syrenapass.presentation.fragments.ProfilesFragment"
+      android:label="ProfilesFragment" />
 </navigation>

@@ -3,6 +3,7 @@ package com.android.syrenapass.presentation.fragments
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.icu.text.IDNA.Info
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -24,6 +25,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.syrenapass.R
 import com.android.syrenapass.TopLevelFunctions.launchLifecycleAwareCoroutine
 import com.android.syrenapass.databinding.SetupUsualFilesFragmentBinding
+import com.android.syrenapass.domain.entities.FileDomain
 import com.android.syrenapass.domain.entities.FilesSortOrder
 import com.android.syrenapass.presentation.activities.MainActivity
 import com.android.syrenapass.presentation.adapters.fileAdapter.FileAdapter
@@ -34,8 +36,12 @@ import com.android.syrenapass.presentation.states.DeletionDataState
 import com.android.syrenapass.presentation.viewmodels.UsualFilesSettingsVM
 import com.android.syrenapass.presentation.viewmodels.UsualFilesSettingsVM.Companion.CONFIRM_CLEAR_REQUEST
 import com.android.syrenapass.presentation.actions.FileSettingsAction
+import com.android.syrenapass.presentation.dialogs.InfoDialog
 import com.android.syrenapass.presentation.dialogs.QuestionDialog
+import com.android.syrenapass.presentation.viewmodels.UsualFilesSettingsVM.Companion.CHANGE_FILES_DELETION_REQUEST
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -179,18 +185,44 @@ class SetupFilesFragment : Fragment() {
   }
 
   /**
+   * Rendering button for enabling or disabling file deletion
+   */
+  private suspend fun Menu.drawSwitchFileDeletionStatusButton() {
+    viewModel.isFileDeletionEnabled.collect {
+      val icon: Int
+      val text: Int
+      if (it) {
+        icon = R.drawable.ic_baseline_pause_24
+        text = R.string.disable_files_deletion
+      } else {
+        icon = R.drawable.ic_baseline_play_arrow_24
+        text = R.string.enable_files_deletion
+      }
+      withContext(Dispatchers.Main) {
+        val startIcon = findItem(R.id.enable)
+          ?: throw RuntimeException("Enable files button not found")
+        startIcon.setIcon(icon).setTitle(text)
+      }
+    }
+  }
+
+  /**
    * Setting up menu
    */
   private fun setupMenu() {
     requireActivity().addMenuProvider(object : MenuProvider {
       override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-        menuInflater.inflate(R.menu.files_menu, menu)
+        launchLifecycleAwareCoroutine {
+          menuInflater.inflate(R.menu.files_menu, menu)
+          menu.drawSwitchFileDeletionStatusButton()
+        }
       }
 
       override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
         when (menuItem.itemId) {
           R.id.help -> viewModel.showHelp()
           R.id.clear -> viewModel.showClearDialog()
+          R.id.enable -> viewModel.changeFilesDeletionEnabled()
         }
         return true
       }
@@ -272,6 +304,13 @@ class SetupFilesFragment : Fragment() {
       viewLifecycleOwner
     ) {
       viewModel.clearFilesDb()
+    }
+    QuestionDialog.setupListener(
+      parentFragmentManager,
+      CHANGE_FILES_DELETION_REQUEST,
+      viewLifecycleOwner
+    ) {
+      viewModel.changeDeletionEnabled()
     }
   }
 

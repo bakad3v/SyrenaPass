@@ -1,7 +1,6 @@
 package com.android.syrenapass.data.entities
 
 import com.android.syrenapass.domain.entities.FilesSortOrder
-import com.android.syrenapass.domain.entities.ProfilesList
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.mutate
 import kotlinx.collections.immutable.persistentListOf

@@ -7,7 +7,7 @@ import android.content.Intent
 import android.os.Build
 import com.android.syrenapass.R
 import com.android.syrenapass.domain.entities.ProfileDomain
-import com.android.syrenapass.domain.usecases.permissions.SetAdminInactiveUseCase
+import com.android.syrenapass.domain.usecases.permissions.SetAdminActiveUseCase
 import com.android.syrenapass.presentation.receivers.DeviceAdminReceiver
 import com.android.syrenapass.presentation.utils.UIText
 import com.android.syrenapass.superuser.superuser.SuperUser
@@ -17,7 +17,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 
-class DeviceAdmin @Inject constructor(@ApplicationContext private val context: Context, private val dpm: DevicePolicyManager, private val setAdminInactiveUseCase: SetAdminInactiveUseCase): SuperUser {
+class DeviceAdmin @Inject constructor(@ApplicationContext private val context: Context, private val dpm: DevicePolicyManager, private val setAdminActiveUseCase: SetAdminActiveUseCase): SuperUser {
     private val deviceAdmin by lazy { ComponentName(context, DeviceAdminReceiver::class.java) }
 
     fun askSuperUserRights(): Intent {
@@ -29,11 +29,19 @@ class DeviceAdmin @Inject constructor(@ApplicationContext private val context: C
         return intent
     }
 
+    suspend fun removeAdminRights() {
+        try {
+            dpm.removeActiveAdmin(deviceAdmin)
+        } catch (e: Exception) {
+            handleException(e)
+        }
+    }
+
     private fun checkAdminRights(): Boolean = dpm.isAdminActive(deviceAdmin)
 
     private suspend fun handleException(e: Exception) {
         if (!checkAdminRights()) {
-            setAdminInactiveUseCase()
+            setAdminActiveUseCase(false)
             throw SuperUserException(NO_ADMIN_RIGHTS,UIText.StringResource(R.string.no_admin_rights))
         }
         throw SuperUserException(e.stackTraceToString(),UIText.StringResource(R.string.unknow_admin_error,e.stackTraceToString()))

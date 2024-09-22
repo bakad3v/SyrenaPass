@@ -14,9 +14,11 @@ class SuperUserManager @Inject constructor(private val owner: Owner, private val
 
     fun askRootRights(): Boolean = root.askSuperUserRights()
 
-    fun askDeviceOwnerRights(): Intent = Intent()//owner.askSuperUserRights()
+    fun askDeviceOwnerRights(onApprove: () -> Unit, onDeny: () -> Unit) = owner.askSuperUserRights(onApprove, onDeny)
 
     fun askDeviceAdminRights(): Intent = admin.askSuperUserRights()
+
+    suspend fun removeAdminRights() = admin.removeAdminRights()
 
     suspend fun getSuperUser(): SuperUser {
         val permissions = getPermissionsUseCase().first()

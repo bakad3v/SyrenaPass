@@ -22,5 +22,4 @@ interface SuperUser {
     suspend fun runTrim()
     @Throws(SuperUserException::class)
     suspend fun executeRootCommand(command: String): Shell.Result
-
 }

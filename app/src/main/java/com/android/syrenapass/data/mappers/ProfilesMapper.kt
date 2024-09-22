@@ -6,6 +6,7 @@ import android.os.Parcel
 import android.os.UserHandle
 import android.os.UserManager
 import android.util.Log
+import com.android.syrenapass.data.entities.IntList
 import com.android.syrenapass.domain.entities.ProfileDomain
 import javax.inject.Inject
 
@@ -17,6 +18,15 @@ class ProfilesMapper @Inject constructor() {
         val main = id == 0
         return ProfileDomain(id,"Unknown name",main)
     }
+
+    fun mapToProfilesWithStatus(profiles: List<ProfileDomain>, ids: IntList): List<ProfileDomain> =
+        profiles.map {
+            if (it.id in ids.list) {
+                it.copy(toDelete = true)
+            } else {
+                it
+            }
+        }
 
     fun mapIdToUserHandle(id: Int): UserHandle {
         val parcel = Parcel.obtain()

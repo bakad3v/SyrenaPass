@@ -69,7 +69,7 @@ class LogsFragment : Fragment() {
       override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         viewLifecycleOwner.launchLifecycleAwareCoroutine {
           menuInflater.inflate(R.menu.logs_menu, menu)
-          drawSwitchLogsStatusButton(menu)
+          menu.drawSwitchLogsStatusButton()
         }
       }
 
@@ -79,7 +79,6 @@ class LogsFragment : Fragment() {
           R.id.logs_enabled -> {
             viewModel.changeLogsEnabledQuestion()
           }
-
           R.id.calendar -> {
             viewModel.buildCalendar() //обновляем логи в приложении
           }
@@ -168,7 +167,7 @@ class LogsFragment : Fragment() {
   /**
    * Rendering button for starting or stopping logging
    */
-  private suspend fun drawSwitchLogsStatusButton(menu: Menu) {
+  private suspend fun Menu.drawSwitchLogsStatusButton() {
     viewModel.logsEnabled.collect {
       val icon: Int
       val text: Int
@@ -180,7 +179,7 @@ class LogsFragment : Fragment() {
         text = R.string.enable_logs
       }
       withContext(Dispatchers.Main) {
-        val startIcon = menu.findItem(R.id.logs_enabled)
+        val startIcon = findItem(R.id.logs_enabled)
           ?: throw RuntimeException("Enable logs button not found")
         startIcon.setIcon(icon).setTitle(text)
       }

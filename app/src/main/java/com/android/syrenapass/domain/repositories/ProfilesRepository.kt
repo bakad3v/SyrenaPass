@@ -6,7 +6,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 interface ProfilesRepository {
-    suspend fun getProfiles(): Flow<List<ProfileDomain>>
+    fun getProfiles(): Flow<List<ProfileDomain>>
     suspend fun deleteProfile(id: Int)
     suspend fun setProfileDeletionStatus(id: Int, status: Boolean)
+    fun getProfilesToDelete(): Flow<List<Int>>
+    suspend fun refreshDeviceProfiles()
 }

@@ -8,6 +8,7 @@ import com.android.syrenapass.domain.usecases.logs.GetLogsDataUseCase
 import com.android.syrenapass.domain.usecases.logs.WriteToLogsUseCase
 import com.android.syrenapass.domain.usecases.permissions.GetPermissionsUseCase
 import com.android.syrenapass.domain.usecases.profiles.DeleteProfilesUseCase
+import com.android.syrenapass.domain.usecases.profiles.GetProfilesToDeleteUseCase
 import com.android.syrenapass.domain.usecases.profiles.GetProfilesUseCase
 import com.android.syrenapass.domain.usecases.settings.GetSettingsUseCase
 import com.android.syrenapass.presentation.utils.UIText
@@ -27,7 +28,7 @@ import javax.inject.Singleton
 class BFUActivitiesRunner @Inject constructor(
     @ApplicationContext private val context: Context,
     private val getSettingsUseCase: GetSettingsUseCase,
-    private val getProfilesUseCase: GetProfilesUseCase,
+    private val getProfilesToDelete: GetProfilesToDeleteUseCase,
     private val getManagedAppsUseCase: GetManagedAppsUseCase,
     private val removeApplicationUseCase: RemoveApplicationUseCase,
     private val deleteProfilesUseCase: DeleteProfilesUseCase,
@@ -83,22 +84,18 @@ class BFUActivitiesRunner @Inject constructor(
     private suspend fun removeProfiles(superUser: SuperUser) {
         writeToLogsResource(R.string.getting_profiles)
         val profiles = try {
-             getProfilesUseCase().first()
+            getProfilesToDelete().first()
         } catch (e: Exception) {
             writeToLogsResource(R.string.getting_profiles_failed)
             return
         }
         profiles.forEach {
-            if (it.toDelete && !it.main) {
-                runSuperuserAction(R.string.removing_profile,R.string.profile_removed,R.string.profile_not_removed, it.id) {
-                    superUser.removeProfile(it.id)
+                runSuperuserAction(R.string.removing_profile,R.string.profile_removed,R.string.profile_not_removed, it) {
+                    superUser.removeProfile(it)
                 }
-            }
         }
         profiles.forEach {
-            if (it.toDelete && !it.main) {
-                deleteProfilesUseCase(it.id)
-            }
+            deleteProfilesUseCase(it)
         }
     }
 

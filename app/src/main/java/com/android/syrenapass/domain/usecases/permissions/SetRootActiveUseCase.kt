@@ -5,7 +5,7 @@ import com.android.syrenapass.domain.repositories.SettingsRepository
 import javax.inject.Inject
 
 class SetRootActiveUseCase @Inject constructor(private val repository: PermissionsRepository) {
-    suspend operator fun invoke() {
-        repository.setRootStatus(true)
+    suspend operator fun invoke(status: Boolean) {
+        repository.setRootStatus(status)
     }
 }

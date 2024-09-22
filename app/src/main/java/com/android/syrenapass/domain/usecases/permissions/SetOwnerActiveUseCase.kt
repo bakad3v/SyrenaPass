@@ -5,7 +5,7 @@ import com.android.syrenapass.domain.repositories.SettingsRepository
 import javax.inject.Inject
 
 class SetOwnerActiveUseCase @Inject constructor(private val repository: PermissionsRepository) {
-    suspend operator fun invoke() {
-        repository.setOwnerStatus(true)
+    suspend operator fun invoke(active: Boolean) {
+        repository.setOwnerStatus(active)
     }
 }

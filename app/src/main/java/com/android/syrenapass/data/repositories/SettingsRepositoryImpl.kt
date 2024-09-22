@@ -40,5 +40,52 @@ class SettingsRepositoryImpl @Inject constructor(@ApplicationContext private val
     }
   }
 
+  override suspend fun setDeleteApps(new: Boolean) {
+      context.settingsDatastore.updateData {
+        it.copy(deleteApps = new)
+      }
+  }
 
+  override suspend fun setDeleteFiles(new: Boolean) {
+      context.settingsDatastore.updateData {
+        it.copy(deleteFiles = new)
+      }
+  }
+
+  override suspend fun setDeleteProfiles(new: Boolean) {
+      context.settingsDatastore.updateData {
+        it.copy(deleteProfiles = new)
+      }
+  }
+
+  override suspend fun setTRIM(new: Boolean) {
+      context.settingsDatastore.updateData {
+        it.copy(trim = new)
+      }
+  }
+
+  override suspend fun setWipe(new: Boolean) {
+      context.settingsDatastore.updateData {
+        it.copy(wipe = new)
+      }
+  }
+
+  override suspend fun runRoot(new: Boolean) {
+      context.settingsDatastore.updateData {
+        it.copy(runRoot = new)
+      }
+  }
+
+  override suspend fun sendBroadcast(new: Boolean) {
+      context.settingsDatastore.updateData {
+        it.copy(sendBroadcast = new)
+      }
+  }
+
+  override suspend fun setRemoveItself(new: Boolean
+  ) {
+      context.settingsDatastore.updateData {
+        it.copy(removeItself = new)
+      }
+  }
 }

@@ -3,7 +3,7 @@ package com.android.syrenapass.superuser.root
 import com.android.syrenapass.R
 import com.android.syrenapass.data.mappers.ProfilesMapper
 import com.android.syrenapass.domain.entities.ProfileDomain
-import com.android.syrenapass.domain.usecases.permissions.SetRootInactiveUseCase
+import com.android.syrenapass.domain.usecases.permissions.SetRootActiveUseCase
 import com.android.syrenapass.presentation.utils.UIText
 import com.android.syrenapass.superuser.superuser.SuperUser
 import com.android.syrenapass.superuser.superuser.SuperUserException
@@ -11,13 +11,13 @@ import com.topjohnwu.superuser.Shell
 
 import javax.inject.Inject
 
-class Root @Inject constructor(private val profilesMapper: ProfilesMapper, private val setRootInactiveUseCase: SetRootInactiveUseCase) : SuperUser {
+class Root @Inject constructor(private val profilesMapper: ProfilesMapper, private val setRootActiveUseCase: SetRootActiveUseCase) : SuperUser {
 
     override suspend fun executeRootCommand(command: String): Shell.Result {
         val result = Shell.cmd(command).exec()
         if (!result.isSuccess) {
             if (!askSuperUserRights()) {
-                setRootInactiveUseCase()
+                setRootActiveUseCase(false)
                 throw SuperUserException(NO_ROOT_RIGHTS,UIText.StringResource(R.string.no_root_rights))
             }
             val resultText = result.err.joinToString("\n")

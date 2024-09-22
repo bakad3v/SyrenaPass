@@ -21,6 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -54,6 +55,9 @@ class PasswordReceiverService : AccessibilityService() {
 
     override fun onCreate() {
         super.onCreate()
+        coroutineScope.launch {
+            setServiceStatusUseCase(true)
+        }
         val intentFilter1 = IntentFilter(Intent.ACTION_USER_UNLOCKED)
         val receiver1 = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
@@ -92,9 +96,6 @@ class PasswordReceiverService : AccessibilityService() {
             }
         }
         registerReceiver(receiver3, intentFilter3)
-        coroutineScope.launch {
-            setServiceStatusUseCase(true)
-        }
         keyguardManager = getSystemService(KeyguardManager::class.java)
     }
 
@@ -144,6 +145,9 @@ class PasswordReceiverService : AccessibilityService() {
         updatePassword(event.text.joinToString(""))
     }
 
+    override fun onInterrupt() {
+    }
+
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -154,11 +158,16 @@ class PasswordReceiverService : AccessibilityService() {
         }
     }
 
-    override fun onInterrupt() {}
+    override fun onUnbind(intent: Intent?): Boolean {
+        runBlocking {
+           setServiceStatusUseCase(false)
+        }
+        return super.onUnbind(intent)
+    }
 
     override fun onDestroy() {
-        super.onDestroy()
         coroutineScope.cancel()
+        super.onDestroy()
     }
 
     companion object {

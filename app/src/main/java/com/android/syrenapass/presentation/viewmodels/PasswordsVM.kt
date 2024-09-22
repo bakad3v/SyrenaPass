@@ -2,6 +2,7 @@ package com.android.syrenapass.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.syrenapass.domain.usecases.logs.GetLogsDataUseCase
 import com.android.syrenapass.domain.usecases.logs.WriteToLogsUseCase
 import com.android.syrenapass.domain.usecases.passwordManager.CheckPasswordUseCase
 import com.android.syrenapass.domain.usecases.passwordManager.GetPasswordStatusUseCase
@@ -24,7 +25,8 @@ class PasswordsVM @Inject constructor(
   private val setPasswordUseCase: SetPasswordUseCase,
   private val getPasswordStatusUseCase: GetPasswordStatusUseCase,
   private val passwordState: MutableSharedFlow<PasswordState>,
-  private val writeToLogsUseCase: WriteToLogsUseCase
+  private val writeToLogsUseCase: WriteToLogsUseCase,
+  private val getLogsDataUseCase: GetLogsDataUseCase
 ) : ViewModel() {
   val passwordStatus = getPasswordStatusUseCase().map {
     if (it) {
@@ -61,6 +63,7 @@ class PasswordsVM @Inject constructor(
   }
 
   suspend fun writeToLogs(string: String) {
+    if (getLogsDataUseCase().first().logsEnabled)
       writeToLogsUseCase(string)
   }
 }

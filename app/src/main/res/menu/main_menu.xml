@@ -8,13 +8,17 @@
     android:id="@+id/logsFragment"
     android:icon="@drawable/ic_baseline_text_snippet_24"
     android:orderInCategory="2"/>
+  <item android:title="@string/profiles"
+      android:id="@+id/profilesFragment"
+      android:icon="@drawable/baseline_manage_accounts_24"
+      android:orderInCategory="3"/>
   <item
     android:title="@string/settings"
     android:id="@+id/settingsFragment"
     android:icon="@drawable/ic_baseline_settings_24"
-    android:orderInCategory="3"/>
+    android:orderInCategory="4"/>
   <item android:title="@string/about"
     android:id="@+id/aboutFragment"
     android:icon="@drawable/ic_baseline_help_outline_24"
-    android:orderInCategory="4"/>
+    android:orderInCategory="5"/>
 </menu>
