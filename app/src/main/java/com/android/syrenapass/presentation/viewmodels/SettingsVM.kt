@@ -14,13 +14,10 @@ import com.android.syrenapass.domain.usecases.bruteforce.SetBruteForceLimitUseCa
 import com.android.syrenapass.domain.usecases.bruteforce.SetBruteForceStatusUseCase
 import com.android.syrenapass.domain.usecases.passwordManager.SetPasswordUseCase
 import com.android.syrenapass.domain.usecases.permissions.GetPermissionsUseCase
-import com.android.syrenapass.domain.usecases.permissions.SetAdminActiveUseCase
 import com.android.syrenapass.domain.usecases.permissions.SetOwnerActiveUseCase
 import com.android.syrenapass.domain.usecases.permissions.SetRootActiveUseCase
 import com.android.syrenapass.domain.usecases.settings.GetSettingsUseCase
-import com.android.syrenapass.domain.usecases.settings.SetDeleteAppsUseCase
 import com.android.syrenapass.domain.usecases.settings.SetRemoveItselfUseCase
-import com.android.syrenapass.domain.usecases.settings.SetRunOnBootUseCase
 import com.android.syrenapass.domain.usecases.settings.SetThemeUseCase
 import com.android.syrenapass.domain.usecases.settings.SetTrimUseCase
 import com.android.syrenapass.domain.usecases.settings.SetWipeUseCase
@@ -32,7 +29,6 @@ import com.android.syrenapass.superuser.superuser.SuperUserManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -95,7 +91,19 @@ class SettingsVM @Inject constructor(
   }
 
   fun askDhizuku() {
-    superUserManager.askDeviceOwnerRights(::onDhizukuRightsApprove, ::onDhizukuRightsDeny)
+    superUserManager.askDeviceOwnerRights(::onDhizukuRightsApprove, ::onDhizukuRightsDeny, ::onDhizukuAbsent)
+  }
+
+  private fun onDhizukuAbsent() {
+    viewModelScope.launch {
+      settingsActionChannel.send(
+        DialogActions.ShowQuestionDialog(
+          title = UIText.StringResource(R.string.install_dhizuku),
+          message = UIText.StringResource(R.string.install_dhizuku_long),
+          requestKey = INSTALL_DIZUKU_DIALOG
+        )
+      )
+    }
   }
 
   private fun onDhizukuRightsApprove() {
@@ -112,9 +120,8 @@ class SettingsVM @Inject constructor(
 
   fun askRoot() {
     viewModelScope.launch {
-      setRootActiveUseCase(
-        superUserManager.askRootRights()
-      )
+      val rootResult = superUserManager.askRootRights()
+      setRootActiveUseCase(rootResult)
     }
   }
 
@@ -299,6 +306,7 @@ class SettingsVM @Inject constructor(
     const val SELF_DESTRUCTION_DIALOG = "selfdestruct_dialog"
     const val USB_DIALOG = "usb_dialog"
     const val BRUTEFORCE_DIALOG = "bruteforce_dialog"
+    const val INSTALL_DIZUKU_DIALOG = "install_dizuku"
   }
 
 }

@@ -1,6 +1,7 @@
 package com.android.syrenapass.presentation.fragments
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
@@ -27,15 +28,16 @@ import com.android.syrenapass.presentation.dialogs.QuestionDialog
 import com.android.syrenapass.presentation.states.ActivityState
 import com.android.syrenapass.presentation.viewmodels.SettingsVM
 import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.BRUTEFORCE_DIALOG
+import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.INSTALL_DIZUKU_DIALOG
 import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.MOVE_TO_ACCESSIBILITY_SERVICE
 import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.MOVE_TO_ADMIN_SETTINGS
 import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.SELF_DESTRUCTION_DIALOG
 import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.TRIM_DIALOG
 import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.USB_DIALOG
 import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.WIPE_DIALOG
-import com.google.android.material.button.MaterialButton.OnCheckedChangeListener
 import com.google.android.material.materialswitch.MaterialSwitch
 import dagger.hilt.android.AndroidEntryPoint
+
 
 /**
  * Fragment for managing app settings
@@ -234,6 +236,11 @@ class SettingsFragment : Fragment() {
     }
   }
 
+  private fun openDhizukuLink() {
+    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/iamr0s/Dhizuku"))
+    startActivity(browserIntent)
+  }
+
   /**
    * Listening for dialog result
    */
@@ -250,6 +257,13 @@ class SettingsFragment : Fragment() {
       viewLifecycleOwner
     ) {
       startAccessibilityService()
+    }
+    QuestionDialog.setupListener(
+      parentFragmentManager,
+      INSTALL_DIZUKU_DIALOG,
+      viewLifecycleOwner
+    ) {
+      openDhizukuLink()
     }
     QuestionDialog.setupListener(
       parentFragmentManager,

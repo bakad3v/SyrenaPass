@@ -1,15 +1,15 @@
 package com.android.syrenapass.presentation.adapters.profileAdapter
 
-import android.util.TypedValue
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.Button
 import androidx.recyclerview.widget.ListAdapter
 import com.android.syrenapass.R
 import com.android.syrenapass.databinding.ProfileCardviewBinding
 import com.android.syrenapass.domain.entities.ProfileDomain
 import com.google.android.material.button.MaterialButton
-
+import com.google.android.material.color.MaterialColors
 import javax.inject.Inject
 
 /**
@@ -37,20 +37,18 @@ class ProfileAdapter @Inject constructor(
       if (delete) {
         setText(R.string.not_delete)
         setIconResource(R.drawable.baseline_block_24)
-        val typedValue = TypedValue()
-        context.theme.resolveAttribute(com.google.android.material.R.attr.colorTertiary, typedValue, true)
-        setTextColor(typedValue.data)
-        setIconTintResource(typedValue.data)
-        setStrokeColorResource(typedValue.data)
+        val color = MaterialColors.getColor(context, com.google.android.material.R.attr.colorTertiary, Color.GRAY)
+        setTextColor(color)
+        iconTint = ColorStateList.valueOf(color)
+        strokeColor = ColorStateList.valueOf(color)
         return
       }
       setText(R.string.delete)
       setIconResource(R.drawable.ic_baseline_delete_24)
-      val typedValue = TypedValue()
-      context.theme.resolveAttribute(com.google.android.material.R.attr.colorError, typedValue, true)
-      setTextColor(typedValue.data)
-      setIconTintResource(typedValue.data)
-      setStrokeColorResource(typedValue.data)
+      val color = MaterialColors.getColor(context, com.google.android.material.R.attr.colorError, Color.GRAY)
+      setTextColor(color)
+      iconTint = ColorStateList.valueOf(color)
+      strokeColor = ColorStateList.valueOf(color)
   }
 
   /**

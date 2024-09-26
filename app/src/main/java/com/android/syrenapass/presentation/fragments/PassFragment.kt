@@ -76,7 +76,8 @@ class PassFragment: Fragment() {
         if (it is PasswordState.CheckPasswordResults && it.rightPassword) {
           viewModel.writeToLogs(getString(R.string.app_entered))
           hideKeyboard()
-          controller.navigate(R.id.setupFilesFragment)
+          parentFragmentManager.popBackStack()
+          controller.navigate(R.id.action_passFragment2_to_setupFilesFragment2)
         }
       }
     }

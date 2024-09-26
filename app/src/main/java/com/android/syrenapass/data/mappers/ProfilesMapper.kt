@@ -19,8 +19,8 @@ class ProfilesMapper @Inject constructor() {
         return ProfileDomain(id,"Unknown name",main)
     }
 
-    fun mapToProfilesWithStatus(profiles: List<ProfileDomain>, ids: IntList): List<ProfileDomain> =
-        profiles.map {
+    fun mapToProfilesWithStatus(profiles: List<ProfileDomain>?, ids: IntList): List<ProfileDomain>? =
+        profiles?.map {
             if (it.id in ids.list) {
                 it.copy(toDelete = true)
             } else {

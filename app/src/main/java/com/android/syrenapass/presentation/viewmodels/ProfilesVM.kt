@@ -9,7 +9,6 @@ import com.android.syrenapass.domain.usecases.profiles.SetProfileDeletionStatusU
 import com.android.syrenapass.domain.usecases.settings.GetSettingsUseCase
 import com.android.syrenapass.domain.usecases.settings.SetDeleteProfilesUseCase
 import com.android.syrenapass.presentation.actions.DialogActions
-import com.android.syrenapass.presentation.states.LogsDataState
 import com.android.syrenapass.presentation.states.ProfilesDataState
 import com.android.syrenapass.presentation.utils.UIText
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,7 +32,12 @@ class ProfilesVM @Inject constructor(
 
     val profileActions = dialogActionsChannel.receiveAsFlow()
 
-    val profiles = getProfilesUseCase().map { ProfilesDataState.ViewData(it) }.stateIn(
+    val profiles = getProfilesUseCase().map {
+        if (it == null) {
+            ProfilesDataState.SuperUserAbsent
+        } else
+        ProfilesDataState.ViewData(it)
+    }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = ProfilesDataState.Loading
@@ -66,7 +70,7 @@ class ProfilesVM @Inject constructor(
     fun showFAQ() {
         viewModelScope.launch {
             dialogActionsChannel.send(
-                DialogActions.ShowInfoDialog (
+                DialogActions.ShowInfoDialog(
                     title = UIText.StringResource(R.string.profiles),
                     message = UIText.StringResource(R.string.profiles_faq)
                 )
@@ -81,7 +85,7 @@ class ProfilesVM @Inject constructor(
                 return@launch
             }
             dialogActionsChannel.send(
-                DialogActions.ShowQuestionDialog (
+                DialogActions.ShowQuestionDialog(
                     title = UIText.StringResource(R.string.enable_profile_deletion),
                     message = UIText.StringResource(R.string.enable_profile_deletion_long),
                     requestKey = CHANGE_PROFILES_DELETION_ENABLED

@@ -157,5 +157,8 @@
   <string name="enable_profile_deletion">Enable profile deletion</string>
   <string name="disable_profile_deletion">Disable profile deletion</string>
   <string name="profiles_deletion_settings">Profiles deletion settings</string>
-  <string name="enable_profile_deletion_long">All profiles marked for deletion will be eleted after entering of duress password</string>
+  <string name="enable_profile_deletion_long">All profiles marked for deletion will be deleted after entering of duress password</string>
+    <string name="install_dhizuku">Do you want to install dhizuku?</string>
+  <string name="install_dhizuku_long">You need to install dhizuku app and give it device owner rights</string>
+  <string name="no_superuser_rights_profiles">You need superuser rights to be able to manae profiles</string>
 </resources>

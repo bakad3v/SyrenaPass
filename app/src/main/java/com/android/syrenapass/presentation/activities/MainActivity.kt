@@ -1,7 +1,5 @@
 package com.android.syrenapass.presentation.activities
 
-import android.content.pm.PackageManager
-import android.os.Build.VERSION
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -19,10 +17,7 @@ import com.android.syrenapass.TopLevelFunctions.launchLifecycleAwareCoroutine
 import com.android.syrenapass.databinding.MainActivityBinding
 import com.android.syrenapass.presentation.states.ActivityState
 import com.android.syrenapass.presentation.viewmodels.MainVM
-import com.rosan.dhizuku.api.Dhizuku
-import com.rosan.dhizuku.api.DhizukuRequestPermissionListener
 import dagger.hilt.android.AndroidEntryPoint
-import org.lsposed.hiddenapibypass.HiddenApiBypass
 
 
 @AndroidEntryPoint
@@ -101,6 +96,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupNormalFragment(state: ActivityState.NormalActivityState) {
+        Log.w("frament","normal")
         mainBinding.toolbar2.title = state.title
         if (supportActionBar == null) {
             setSupportActionBar(mainBinding.toolbar2)
@@ -113,6 +109,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupPassFragment() {
+        Log.w("frament","pass")
         setSupportActionBar(null)
         mainBinding.navigationView.visibility = View.GONE
     }

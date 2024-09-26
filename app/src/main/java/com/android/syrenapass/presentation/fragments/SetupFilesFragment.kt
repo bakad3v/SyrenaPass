@@ -3,7 +3,6 @@ package com.android.syrenapass.presentation.fragments
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.icu.text.IDNA.Info
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -25,20 +24,18 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.syrenapass.R
 import com.android.syrenapass.TopLevelFunctions.launchLifecycleAwareCoroutine
 import com.android.syrenapass.databinding.SetupUsualFilesFragmentBinding
-import com.android.syrenapass.domain.entities.FileDomain
 import com.android.syrenapass.domain.entities.FilesSortOrder
+import com.android.syrenapass.presentation.actions.FileSettingsAction
 import com.android.syrenapass.presentation.activities.MainActivity
 import com.android.syrenapass.presentation.adapters.fileAdapter.FileAdapter
 import com.android.syrenapass.presentation.dialogs.DialogLauncher
 import com.android.syrenapass.presentation.dialogs.InputDigitDialog
+import com.android.syrenapass.presentation.dialogs.QuestionDialog
 import com.android.syrenapass.presentation.states.ActivityState
 import com.android.syrenapass.presentation.states.DeletionDataState
 import com.android.syrenapass.presentation.viewmodels.UsualFilesSettingsVM
-import com.android.syrenapass.presentation.viewmodels.UsualFilesSettingsVM.Companion.CONFIRM_CLEAR_REQUEST
-import com.android.syrenapass.presentation.actions.FileSettingsAction
-import com.android.syrenapass.presentation.dialogs.InfoDialog
-import com.android.syrenapass.presentation.dialogs.QuestionDialog
 import com.android.syrenapass.presentation.viewmodels.UsualFilesSettingsVM.Companion.CHANGE_FILES_DELETION_REQUEST
+import com.android.syrenapass.presentation.viewmodels.UsualFilesSettingsVM.Companion.CONFIRM_CLEAR_REQUEST
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -416,6 +413,7 @@ class SetupFilesFragment : Fragment() {
 
 
   override fun onDestroyView() {
+    binding.items.setAdapter(null)
     _binding = null
     super.onDestroyView()
   }

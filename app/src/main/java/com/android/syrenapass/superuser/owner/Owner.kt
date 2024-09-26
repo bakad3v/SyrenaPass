@@ -3,7 +3,6 @@ package com.android.syrenapass.superuser.owner
 import android.annotation.SuppressLint
 import android.app.admin.DevicePolicyManager
 import android.app.admin.IDevicePolicyManager
-import android.content.ComponentName
 import android.content.Context
 import android.content.IntentSender
 import android.content.pm.IPackageInstaller
@@ -16,7 +15,6 @@ import com.android.syrenapass.R
 import com.android.syrenapass.data.mappers.ProfilesMapper
 import com.android.syrenapass.domain.entities.ProfileDomain
 import com.android.syrenapass.domain.usecases.permissions.SetOwnerActiveUseCase
-import com.android.syrenapass.presentation.receivers.DeviceAdminReceiver
 import com.android.syrenapass.presentation.utils.UIText
 import com.android.syrenapass.superuser.superuser.SuperUser
 import com.android.syrenapass.superuser.superuser.SuperUserException
@@ -96,19 +94,23 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
     }
 
 
-    fun askSuperUserRights(onApprove: () -> Unit, onDeny: () -> Unit) {
+    fun askSuperUserRights(onApprove: () -> Unit, onDeny: () -> Unit, onAbsent: () -> Unit) {
         if (!initialized) {
             initDhizuku()
         }
-        Dhizuku.requestPermission(object : DhizukuRequestPermissionListener() {
-            override fun onRequestPermission(grantResult: Int) {
-                if (grantResult == PackageManager.PERMISSION_GRANTED) {
-                    onApprove()
-                } else {
-                    onDeny()
+        try {
+            Dhizuku.requestPermission(object : DhizukuRequestPermissionListener() {
+                override fun onRequestPermission(grantResult: Int) {
+                    if (grantResult == PackageManager.PERMISSION_GRANTED) {
+                        onApprove()
+                    } else {
+                        onDeny()
+                    }
                 }
-            }
-        })
+            })
+        } catch (e: AssertionError) {
+            onAbsent()
+        }
     }
 
     private fun checkOwner(): Boolean {
@@ -117,7 +119,7 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
 
     override suspend fun wipe() {
         var flags = 0
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+        if (VERSION.SDK_INT >= Build.VERSION_CODES.Q)
             flags = flags.or(DevicePolicyManager.WIPE_SILENTLY)
         try {
             dpm.wipeData(flags)

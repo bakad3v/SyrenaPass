@@ -1,5 +1,6 @@
 package com.android.syrenapass.superuser.root
 
+import android.util.Log
 import com.android.syrenapass.R
 import com.android.syrenapass.data.mappers.ProfilesMapper
 import com.android.syrenapass.domain.entities.ProfileDomain
@@ -50,7 +51,8 @@ class Root @Inject constructor(private val profilesMapper: ProfilesMapper, priva
 
     fun askSuperUserRights(): Boolean {
         val result = Shell.cmd("id").exec()
-        return result.isSuccess
+        Log.w("uid=0(root)",result.out.joinToString { ";" })
+        return result.out[0].startsWith("uid=0(root)")
     }
 
     override suspend fun wipe() {
