@@ -1,6 +1,7 @@
 package com.android.syrenapass.presentation.services
 
 import android.content.Context
+import android.util.Log
 import com.android.syrenapass.R
 import com.android.syrenapass.domain.usecases.apps.GetManagedAppsUseCase
 import com.android.syrenapass.domain.usecases.apps.RemoveApplicationUseCase
@@ -9,18 +10,15 @@ import com.android.syrenapass.domain.usecases.logs.WriteToLogsUseCase
 import com.android.syrenapass.domain.usecases.permissions.GetPermissionsUseCase
 import com.android.syrenapass.domain.usecases.profiles.DeleteProfilesUseCase
 import com.android.syrenapass.domain.usecases.profiles.GetProfilesToDeleteUseCase
-import com.android.syrenapass.domain.usecases.profiles.GetProfilesUseCase
 import com.android.syrenapass.domain.usecases.settings.GetSettingsUseCase
 import com.android.syrenapass.presentation.utils.UIText
 import com.android.syrenapass.superuser.superuser.SuperUser
 import com.android.syrenapass.superuser.superuser.SuperUserException
 import com.android.syrenapass.superuser.superuser.SuperUserManager
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -43,23 +41,24 @@ class BFUActivitiesRunner @Inject constructor(
     private var isRunning = false
 
     suspend fun runTask() {
+        Log.w("task","start")
         mutex.withLock {
             if (isRunning) {
+                Log.w("task","not_running")
                 return
             }
             isRunning = true
         }
-        withContext(Dispatchers.IO) {
-            runBFUActivity()
-            mutex.withLock {
-                isRunning = false
-            }
+        Log.w("task","running")
+        runBFUActivity()
+        mutex.withLock {
+            isRunning = false
         }
     }
 
-    private suspend fun writeToLogsResource(rId: Int, vararg obj: Any) {
+    private suspend fun writeToLogsResource(rId: Int, vararg obj: String) {
         if (logsAllowed == true)
-            writeToLogsUseCase(context.getString(rId, obj))
+            writeToLogsUseCase(context.getString(rId, *obj))
     }
 
     private suspend fun writeToLogsUIText(text: UIText.StringResource) {
@@ -67,9 +66,9 @@ class BFUActivitiesRunner @Inject constructor(
             writeToLogsUseCase(text.asString(context))
     }
 
-    private suspend fun runSuperuserAction(startText: Int, successText: Int, failureText: Int, vararg startTextParams: Any, action: suspend () -> Unit): Boolean {
+    private suspend fun runSuperuserAction(startText: Int, successText: Int, failureText: Int, vararg startTextParams: String, action: suspend () -> Unit): Boolean {
         try {
-            writeToLogsResource(startText, startTextParams)
+            writeToLogsResource(startText, *startTextParams)
             action()
             writeToLogsResource(successText)
             return true
@@ -90,7 +89,7 @@ class BFUActivitiesRunner @Inject constructor(
             return
         }
         profiles.forEach {
-                runSuperuserAction(R.string.removing_profile,R.string.profile_removed,R.string.profile_not_removed, it) {
+                runSuperuserAction(R.string.removing_profile,R.string.profile_removed,R.string.profile_not_removed, it.toString()) {
                     superUser.removeProfile(it)
                 }
         }
@@ -144,7 +143,9 @@ class BFUActivitiesRunner @Inject constructor(
             return
         }
         writeToLogsResource(R.string.got_data)
-        if (permissions.isAdmin && settings.wipe) {
+        if (!permissions.isRoot && !permissions.isOwner && !permissions.isAdmin)
+            return
+        if (settings.wipe) {
             runSuperuserAction(R.string.wiping_data,R.string.data_wiped,R.string.wiping_data_error) {
                 superUser.wipe()
             }
@@ -152,6 +153,11 @@ class BFUActivitiesRunner @Inject constructor(
         }
         if (!permissions.isRoot && !permissions.isOwner)
             return
+        if (permissions.isRoot && settings.stopLogdOnStart) {
+            runSuperuserAction(R.string.stopping_logd, R.string.logd_stopped, R.string.logd_failed) {
+                superUser.stopLogd()
+            }
+        }
         if (settings.deleteProfiles) {
             removeProfiles(superUser)
         }
@@ -162,15 +168,30 @@ class BFUActivitiesRunner @Inject constructor(
             if (settings.runRoot) {
                 superUser.executeRootCommand("TODO")
             }
+        }
+        if (settings.deleteFiles) {
+            return
+        }
+        if (permissions.isRoot) {
             if (settings.trim) {
                 runSuperuserAction(R.string.running_trim, R.string.trim_runned, R.string.trim_failed) {
                     superUser.runTrim()
                 }
             }
         }
-        if (settings.removeItself && !settings.deleteFiles && permissions.isRoot) {
+        if (settings.removeItself) {
             runSuperuserAction(R.string.uninstalling_itself, R.string.uninstallation_complete,R.string.uninstallation_failed) {
                 superUser.uninstallApp(context.packageName)
+            }
+        }
+        if (settings.clearAndHideItself && permissions.isOwner) {
+            runSuperuserAction(R.string.clearing_and_hiding, R.string.uninstallation_complete,R.string.clear_and_hide_failed) {
+                try {
+                    superUser.hideApp(context.packageName)
+                    superUser.clearAppData(context.packageName)
+                } catch (e: Exception) {
+                    Log.w("error",e.stackTraceToString())
+                }
             }
         }
     }

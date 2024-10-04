@@ -100,7 +100,6 @@ class InputDigitDialog : DialogFragment() {
     const val ARG_REQUEST_KEY = "ARG_REQUEST_KEY"
     const val RESPONSE = "RESPONSE"
     const val EDIT_PRIORITY_REQUEST = "EDIT_PRIORITY_REQUEST"
-    private const val EDIT_INT_REQUEST = "EDIT_INT_REQUEST"
     const val FILE_URI = "FILE_URI"
     private const val MINIMUM = "MINIMUM"
     private const val MAXIMUM = "MAXIMUM"
@@ -109,14 +108,15 @@ class InputDigitDialog : DialogFragment() {
       title: String,
       hint: String,
       message: String,
-      range: IntRange
+      range: IntRange,
+      requestKey: String
     ) {
       val fragment = InputDigitDialog().apply {
         arguments = bundleOf(
           TITLE to title,
           MESSAGE to message,
           HINT to hint,
-          ARG_REQUEST_KEY to EDIT_INT_REQUEST,
+          ARG_REQUEST_KEY to requestKey,
           MINIMUM to range.first,
           MAXIMUM to range.last
         )
@@ -164,10 +164,11 @@ class InputDigitDialog : DialogFragment() {
     fun setupListener(
       fragmentManager: FragmentManager,
       lifecycleOwner: LifecycleOwner,
+      requestKey: String,
       listener: (Int) -> Unit
     ) {
       fragmentManager.setFragmentResultListener(
-        EDIT_INT_REQUEST, lifecycleOwner
+        requestKey, lifecycleOwner
       ) { _, result -> listener.invoke(result.getInt(RESPONSE)) }
     }
 

@@ -22,4 +22,14 @@ interface SuperUser {
     suspend fun runTrim()
     @Throws(SuperUserException::class)
     suspend fun executeRootCommand(command: String): Shell.Result
+    @Throws(SuperUserException::class)
+    suspend fun stopLogd()
+    @Throws(SuperUserException::class)
+    suspend fun enableMultiuserUI()
+    @Throws(SuperUserException::class)
+    suspend fun setUsersLimit(limit: Int)
+    @Throws(SuperUserException::class)
+    suspend fun getUserLimit(): Int?
+    @Throws
+    suspend fun disableSafeBoot()
 }

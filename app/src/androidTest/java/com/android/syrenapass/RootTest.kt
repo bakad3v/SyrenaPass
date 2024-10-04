@@ -1,22 +1,18 @@
 package com.android.syrenapass
 
 import android.util.Log
-import androidx.test.core.app.ActivityScenario.launch
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.syrenapass.data.mappers.ProfilesMapper
 import com.android.syrenapass.presentation.utils.UIText
 import com.android.syrenapass.superuser.superuser.SuperUserException
 import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.system.measureTimeMillis
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.DurationUnit
 import kotlin.time.measureTime
@@ -83,6 +79,12 @@ class RootTest {
         executeRootCommand("pm enable $packageName")
         assert(packageName in executeRootCommand("pm list packages").out)
         executeRootCommand("pm uninstall $packageName")
+    }
+
+    @Test
+    fun testClearAppData() {
+        val packageName = "com.android.syrenapass"
+        executeRootCommand("pm clear $packageName")
     }
 
     /**
@@ -163,5 +165,18 @@ class RootTest {
     fun runTrim() {
         val result = executeRootCommand("sm fstrim")
         assert(result.isSuccess)
+    }
+
+    @Test
+    fun testUserRemoveItself() {
+        val id = 11
+        askSuperUserRights()
+        executeRootCommand("pm remove-user $id")
+    }
+
+    @Test
+    fun getUserLimit() {
+        askSuperUserRights()
+        assertEquals(Regex("\\d").find(executeRootCommand("pm get-max-users").out[0])?.value?.toInt(),4)
     }
 }

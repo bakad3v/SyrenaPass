@@ -18,7 +18,6 @@ import com.android.syrenapass.presentation.activities.MainActivity
 import com.android.syrenapass.presentation.states.ActivityState
 import com.android.syrenapass.presentation.states.PasswordState
 import com.android.syrenapass.presentation.viewmodels.PasswordsVM
-import com.google.android.material.textfield.TextInputEditText
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -77,7 +76,7 @@ class PassFragment: Fragment() {
           viewModel.writeToLogs(getString(R.string.app_entered))
           hideKeyboard()
           parentFragmentManager.popBackStack()
-          controller.navigate(R.id.action_passFragment2_to_setupFilesFragment2)
+          controller.navigate(R.id.action_passFragmentNav_to_settingsFragment)
         }
       }
     }

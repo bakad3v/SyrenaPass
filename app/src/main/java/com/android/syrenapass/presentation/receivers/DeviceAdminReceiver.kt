@@ -3,13 +3,11 @@ import android.app.admin.DeviceAdminReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.UserHandle
-import android.os.UserManager
 import android.util.Log
 import com.android.syrenapass.domain.usecases.bruteforce.OnRightPasswordUseCase
 import com.android.syrenapass.domain.usecases.bruteforce.OnWrongPasswordUseCase
 import com.android.syrenapass.domain.usecases.permissions.SetAdminActiveUseCase
 import com.android.syrenapass.presentation.services.MyJobIntentService
-import com.android.syrenapass.presentation.services.MyWorkService
 import com.android.syrenapass.presentation.services.ServicesLauncher
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -35,16 +33,13 @@ class DeviceAdminReceiver: DeviceAdminReceiver() {
     lateinit var setAdminActiveUseCase: SetAdminActiveUseCase
 
     override fun onPasswordFailed(context: Context, intent: Intent, user: UserHandle) {
-        super.onPasswordFailed(context, intent, user)
         coroutineScope.launch {
             if (onWrongPasswordUseCase()) {
-                if (context.getSystemService(UserManager::class.java).isUserUnlocked) {
-                    MyWorkService.start(context)
-                } else {
-                    MyJobIntentService.start(context)
-                }
+                Log.w("passFailed","failed")
+                MyJobIntentService.start(context)
             }
         }
+        super.onPasswordFailed(context, intent, user)
     }
 
     override fun onPasswordSucceeded(context: Context, intent: Intent, user: UserHandle) {

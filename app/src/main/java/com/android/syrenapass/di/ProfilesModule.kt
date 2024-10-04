@@ -8,7 +8,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import javax.inject.Singleton
 
 @Module
@@ -21,6 +21,6 @@ abstract class ProfilesModule {
     companion object {
         @Provides
         @Singleton
-        fun provideProfilesFlow(): MutableStateFlow<List<ProfileDomain>> = MutableStateFlow(listOf())
+        fun provideProfilesFlow(): MutableSharedFlow<List<ProfileDomain>> = MutableSharedFlow()
     }
 }

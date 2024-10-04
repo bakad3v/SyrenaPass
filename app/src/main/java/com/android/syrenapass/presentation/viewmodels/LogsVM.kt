@@ -18,7 +18,6 @@ import com.android.syrenapass.presentation.states.LogsDataState
 import com.android.syrenapass.presentation.utils.DateValidatorAllowed
 import com.android.syrenapass.presentation.utils.UIText
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -142,7 +141,8 @@ class LogsVM @Inject constructor(
             UIText.StringResource(R.string.enter_timeout_logs),
             logsData.logsAutoRemovePeriod.toString(),
             UIText.StringResource(R.string.timeout_logs_long),
-            1..10000
+            1..10000,
+            CHANGE_TIMEOUT
           )
         )
       )
@@ -180,5 +180,6 @@ class LogsVM @Inject constructor(
   companion object {
     const val CHANGE_TIMEOUT_REQUEST = "change_timeout_request"
     const val CHANGE_LOGS_ENABLED_REQUEST = "change_logs_enabled_request"
+    const val CHANGE_TIMEOUT = "change_timeout"
   }
 }

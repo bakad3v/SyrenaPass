@@ -5,6 +5,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Build.VERSION
+import android.os.UserManager
 import com.android.syrenapass.R
 import com.android.syrenapass.domain.entities.ProfileDomain
 import com.android.syrenapass.domain.usecases.permissions.SetAdminActiveUseCase
@@ -50,7 +52,7 @@ class DeviceAdmin @Inject constructor(@ApplicationContext private val context: C
 
     override suspend fun wipe() {
         var flags = 0
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+        if (VERSION.SDK_INT >= Build.VERSION_CODES.Q)
             flags = flags.or(DevicePolicyManager.WIPE_SILENTLY)
         try {
             dpm.wipeData(flags)
@@ -84,6 +86,26 @@ class DeviceAdmin @Inject constructor(@ApplicationContext private val context: C
     }
 
     override suspend fun executeRootCommand(command: String): Shell.Result {
+        throw SuperUserException(ADMIN_ERROR_TEXT,UIText.StringResource(R.string.device_admin_error))
+    }
+
+    override suspend fun stopLogd() {
+        throw SuperUserException(ADMIN_ERROR_TEXT, UIText.StringResource(R.string.device_admin_error))
+    }
+
+    override suspend fun enableMultiuserUI() {
+        throw SuperUserException(ADMIN_ERROR_TEXT,UIText.StringResource(R.string.device_admin_error))
+    }
+
+    override suspend fun setUsersLimit(limit: Int) {
+        throw SuperUserException(ADMIN_ERROR_TEXT,UIText.StringResource(R.string.device_admin_error))
+    }
+
+    override suspend fun getUserLimit(): Int? {
+        throw SuperUserException(ADMIN_ERROR_TEXT,UIText.StringResource(R.string.device_admin_error))
+    }
+
+    override suspend fun disableSafeBoot() {
         throw SuperUserException(ADMIN_ERROR_TEXT,UIText.StringResource(R.string.device_admin_error))
     }
 

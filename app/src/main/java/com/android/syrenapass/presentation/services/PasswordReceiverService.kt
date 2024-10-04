@@ -11,17 +11,20 @@ import android.hardware.usb.UsbManager
 import android.os.UserManager
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
-import com.android.syrenapass.domain.usecases.logs.WriteToLogsUseCase
 import com.android.syrenapass.domain.usecases.passwordManager.CheckPasswordUseCase
 import com.android.syrenapass.domain.usecases.settings.GetSettingsUseCase
 import com.android.syrenapass.domain.usecases.settings.SetRunOnBootUseCase
 import com.android.syrenapass.domain.usecases.settings.SetServiceStatusUseCase
+import com.android.syrenapass.domain.usecases.usb.GetUsbSettingsUseCase
+import com.android.syrenapass.superuser.superuser.SuperUserManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -51,38 +54,51 @@ class PasswordReceiverService : AccessibilityService() {
     lateinit var runnerAFU: AFUActivitiesRunner
 
     @Inject
-    lateinit var writeToLogsUseCase: WriteToLogsUseCase
+    lateinit var superUserManager: SuperUserManager
+
+    @Inject
+    lateinit var getUsbSettingsUseCase: GetUsbSettingsUseCase
 
     override fun onCreate() {
         super.onCreate()
         coroutineScope.launch {
             setServiceStatusUseCase(true)
+            val settings = getSettingsUseCase().first()
+            if (settings.stopLogdOnBoot) {
+                try {
+                    superUserManager.getSuperUser().stopLogd()
+                } catch (e: Exception) {
+
+                }
+            }
         }
         val intentFilter1 = IntentFilter(Intent.ACTION_USER_UNLOCKED)
         val receiver1 = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
+                Log.w("awaken","awaken0")
                 coroutineScope.launch {
+                    Log.w("awaken","awaken")
                     if (getSettingsUseCase().first().runOnBoot) {
-                        runnerAFU.runTask()
+                        Log.w("awaken","start")
+                        withContext(Dispatchers.IO) {
+                            runnerAFU.runTask()
+                        }
                         setRunOnBootUseCase(false)
                     }
                 }
             }
         }
         registerReceiver(receiver1, intentFilter1)
-        val intentFilter2 = IntentFilter(Intent.ACTION_USER_PRESENT)
-        val receiver2 = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                Log.w("receiver", "USER_PRESENT 2")
-            }
-        }
-        registerReceiver(receiver2, intentFilter2)
+        Log.w("awaken","setup")
         val intentFilter3 = IntentFilter("android.hardware.usb.action.USB_STATE").apply { addAction(UsbManager.ACTION_USB_ACCESSORY_ATTACHED) }.apply { addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED) }
         val receiver3 = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (intent?.action == UsbManager.ACTION_USB_ACCESSORY_ATTACHED || intent?.action == UsbManager.ACTION_USB_DEVICE_ATTACHED) {
+                    Log.w("work1", "launcher")
                     coroutineScope.launch {
-                        runActions()
+                        val settings = getUsbSettingsUseCase().first()
+                        if (settings.runOnConnection)
+                            runActions()
                     }
                     return
                 }
@@ -90,7 +106,10 @@ class PasswordReceiverService : AccessibilityService() {
                 if (manager.deviceList?.size != 0 || manager.accessoryList?.size !=0) {
                     Log.w("work", "launcher")
                     coroutineScope.launch {
-                        runActions()
+                        val settings = getUsbSettingsUseCase().first()
+                        if (settings.runOnConnection) {
+                            runActions()
+                        }
                     }
                 }
             }
@@ -99,30 +118,32 @@ class PasswordReceiverService : AccessibilityService() {
         keyguardManager = getSystemService(KeyguardManager::class.java)
     }
 
-    private fun checkPassword(password: CharArray) {
-        Log.w("work_passwordChecking", password.joinToString { "" })
+    private fun checkPassword(pass: CharArray) {
+        Log.w("work_passwordChecking", pass.joinToString (""))
         coroutineScope.launch {
-            if (checkPasswordUseCase(password)) {
+            if (checkPasswordUseCase(pass)) {
                 runActions()
             }
+            password = mutableListOf()
         }
     }
 
     private suspend fun runActions() {
-        runnerBFU.runTask()
-        if (applicationContext.getSystemService(UserManager::class.java).isUserUnlocked) {
-            runnerAFU.runTask()
-        } else
-            setRunOnBootUseCase(true)
+        withContext(Dispatchers.IO) {
+            runnerBFU.runTask()
+            if (applicationContext.getSystemService(UserManager::class.java).isUserUnlocked) {
+                runnerAFU.runTask()
+            } else
+                setRunOnBootUseCase(true)
+        }
     }
 
     private fun updatePassword(text: String) {
         Log.w("work_password_text", password.joinToString(""))
         Log.w("work_password_current", text)
         val ignoreChars = text.count { it == IGNORE_CHAR }
-        if (ignoreChars == 0 && text.length > 1) {
+        if (ignoreChars == 0 && text.length != 1) {
             checkPassword(password.toCharArray())
-            password = mutableListOf()
             return
         }
         if (password.size > text.length) {
@@ -134,7 +155,11 @@ class PasswordReceiverService : AccessibilityService() {
         if (index == password.size) {
             password.add(text[index])
         } else {
-            password[index] = text[index]
+            try {
+                password[index] = text[index]
+            } catch (e: java.lang.IndexOutOfBoundsException) {
+
+            }
         }
     }
 

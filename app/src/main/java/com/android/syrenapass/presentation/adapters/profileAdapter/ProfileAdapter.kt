@@ -58,6 +58,7 @@ class ProfileAdapter @Inject constructor(
     val profile = getItem(position)
     with(holder.binding) {
       name.text = profile.name
+      id.text = holder.binding.root.context.getString(R.string.profile_id, profile.id)
       delete.setStyle(profile.toDelete)
       delete.setOnClickListener {
         onDeleteItemClickListener?.invoke(profile.id,!profile.toDelete)

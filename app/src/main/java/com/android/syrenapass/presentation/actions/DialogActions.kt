@@ -18,7 +18,8 @@ sealed class DialogActions {
     val title: UIText.StringResource,
     val hint: String,
     val message: UIText.StringResource,
-    val range: IntRange
+    val range: IntRange,
+    val requestKey: String
   ) :
     DialogActions()
 

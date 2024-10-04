@@ -18,4 +18,11 @@ interface SettingsRepository {
   suspend fun runRoot(new: Boolean)
   suspend fun sendBroadcast(new: Boolean)
   suspend fun setRemoveItself(new: Boolean)
+    suspend fun setLogdOnStart(new: Boolean)
+  suspend fun setLogdOnBoot(new: Boolean)
+  suspend fun setClearAndHide(new: Boolean)
+    suspend fun setUserLimit(limit: Int)
+  suspend fun enableMultiuserUI()
+    suspend fun getUserLimit(): Int?
+    suspend fun disableSafeBoot()
 }

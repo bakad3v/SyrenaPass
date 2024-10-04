@@ -68,7 +68,6 @@ class EncryptionManagerImpl @Inject constructor(@ApplicationContext private val 
         outputStream.use {
             it.write(encryptCypher.iv.size)
             it.write(encryptCypher.iv)
-            it.write(encryptedBytes.size.toByteArray())
             it.write(encryptedBytes)
         }
         return encryptedBytes
@@ -102,25 +101,13 @@ class EncryptionManagerImpl @Inject constructor(@ApplicationContext private val 
         return result
     }
 
-    private fun Int.toByteArray(): ByteArray = ByteArray(4) { i ->
-        (this shr (i * 8) and 0xFF).toByte()
-    }
-
-    private fun ByteArray.toInt(): Int =
-        this.foldIndexed(0) { i, acc, byte ->
-            acc or ((byte.toInt() and 0xFF) shl (i * 8))
-        }
-
 
     override fun decrypt(alias: String,inputStream: InputStream): ByteArray {
         return inputStream.use {
             val ivSize = it.read()
             val iv = ByteArray(ivSize)
             it.read(iv)
-            val encryptedBytesSize = ByteArray(4)
-            it.read(encryptedBytesSize)
-            val encryptedBytes = ByteArray(encryptedBytesSize.toInt())
-            it.read(encryptedBytes)
+            val encryptedBytes = it.readBytes()
             getDecryptCipherForIv(alias,iv).doFinal(encryptedBytes)
         }
     }

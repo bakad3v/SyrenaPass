@@ -25,6 +25,7 @@ import com.android.syrenapass.presentation.viewmodels.LogsVM
 import com.android.syrenapass.presentation.viewmodels.LogsVM.Companion.CHANGE_LOGS_ENABLED_REQUEST
 import com.android.syrenapass.presentation.viewmodels.LogsVM.Companion.CHANGE_TIMEOUT_REQUEST
 import com.android.syrenapass.presentation.dialogs.QuestionDialog
+import com.android.syrenapass.presentation.viewmodels.LogsVM.Companion.CHANGE_TIMEOUT
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.MaterialDatePicker
 import dagger.hilt.android.AndroidEntryPoint
@@ -103,7 +104,6 @@ class LogsFragment : Fragment() {
         when (it) {
           is LogsActions.ShowUsualDialog -> dialogLauncher.launchDialogFromAction(it.value)
           is LogsActions.ShowDatePicker -> with(it) { buildCalendar(dateValidator, selection) }
-          else -> {}
         }
       }
     }
@@ -159,7 +159,7 @@ class LogsFragment : Fragment() {
     ) {
       viewModel.changeLogsEnabled()
     }
-    InputDigitDialog.setupListener(parentFragmentManager, viewLifecycleOwner) {
+    InputDigitDialog.setupListener(parentFragmentManager, viewLifecycleOwner,CHANGE_TIMEOUT) {
       viewModel.changeAutoDeletionTimeout(it)
     }
   }

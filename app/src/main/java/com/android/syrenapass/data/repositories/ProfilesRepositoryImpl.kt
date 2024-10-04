@@ -10,8 +10,9 @@ import com.android.syrenapass.superuser.superuser.SuperUserException
 import com.android.syrenapass.superuser.superuser.SuperUserManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -21,7 +22,7 @@ class ProfilesRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val profilesMapper: ProfilesMapper,
     private val superUserManager: SuperUserManager,
-    private val profilesOnDevice: MutableStateFlow<List<ProfileDomain>?>,
+    private val profilesOnDevice: MutableSharedFlow<List<ProfileDomain>?>,
     private val coroutineScope: CoroutineScope,
     profilesSerializer: ProfilesSerializer
 ) : ProfilesRepository {
@@ -46,13 +47,15 @@ class ProfilesRepositoryImpl @Inject constructor(
 
     @Throws(SuperUserException::class)
     override suspend fun refreshDeviceProfiles() {
-        profilesOnDevice.emit(
-            try {
-                superUserManager.getSuperUser().getProfiles().filter { it.id != 0 }
-            } catch (e: SuperUserException) {
-                null
-            }
-        )
+        coroutineScope.launch(Dispatchers.IO) {
+            profilesOnDevice.emit(
+                try {
+                    superUserManager.getSuperUser().getProfiles().filter { it.id != 0 }
+                } catch (e: SuperUserException) {
+                    null
+                }
+            )
+        }
     }
 
     override fun getProfilesToDelete() : Flow<List<Int>> = context.profilesDatastore.data.map { it.list }

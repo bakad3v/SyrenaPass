@@ -1,5 +1,6 @@
 package com.android.syrenapass.presentation.fragments
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,16 +17,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.syrenapass.R
 import com.android.syrenapass.TopLevelFunctions.launchLifecycleAwareCoroutine
 import com.android.syrenapass.databinding.SetupProfilesFragmentBinding
-import com.android.syrenapass.presentation.actions.DialogActions
 import com.android.syrenapass.presentation.activities.MainActivity
 import com.android.syrenapass.presentation.adapters.profileAdapter.ProfileAdapter
 import com.android.syrenapass.presentation.dialogs.DialogLauncher
 import com.android.syrenapass.presentation.dialogs.QuestionDialog
 import com.android.syrenapass.presentation.states.ActivityState
 import com.android.syrenapass.presentation.states.ProfilesDataState
-import com.android.syrenapass.presentation.utils.UIText
 import com.android.syrenapass.presentation.viewmodels.ProfilesVM
 import com.android.syrenapass.presentation.viewmodels.ProfilesVM.Companion.CHANGE_PROFILES_DELETION_ENABLED
+import com.android.syrenapass.presentation.viewmodels.ProfilesVM.Companion.NO_SUPERUSER
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -113,7 +113,11 @@ class ProfilesFragment: Fragment() {
     }
 
     private fun createProfile() {
-       startActivity(Intent("android.settings.USER_SETTINGS"))
+        try {
+            startActivity(Intent("android.settings.USER_SETTINGS"))
+        } catch (e: ActivityNotFoundException) {
+            viewModel.showNoUserSettingsDialog()
+        }
     }
 
     private fun setMainActivityState() {
@@ -144,13 +148,7 @@ class ProfilesFragment: Fragment() {
         viewLifecycleOwner.launchLifecycleAwareCoroutine {
             viewModel.profiles.collect {
                 if (it is ProfilesDataState.SuperUserAbsent) {
-                    dialogLauncher.launchDialogFromAction(DialogActions.ShowQuestionDialog(
-                        title = UIText.StringResource(R.string.no_superuser_rights),
-                        message = UIText.StringResource(R.string.no_superuser_rights_profiles),
-                        hideCancel = true,
-                        cancellable = false,
-                        requestKey = NO_SUPERUSER
-                    ))
+                   viewModel.showNoSuperuserRightsDialog()
                 }
                 if (it is ProfilesDataState.ViewData) {
                     myProfileAdapter.submitList(it.items)
@@ -202,9 +200,5 @@ class ProfilesFragment: Fragment() {
         binding.items.setAdapter(null)
         _binding = null
         super.onDestroyView()
-    }
-
-    companion object {
-        private const val NO_SUPERUSER = "no_superuser"
     }
 }

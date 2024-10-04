@@ -22,7 +22,7 @@ class DialogLauncher (
         showQuestionDialog(title.asString(context), message.asString(context), requestKey, hideCancel, cancellable)
       }
       is DialogActions.ShowInputDigitDialog -> with(action) {
-        showDigitInputDialog(title.asString(context), hint, message.asString(context), range)
+        showDigitInputDialog(title.asString(context), hint, message.asString(context), range, requestKey)
       }
       is DialogActions.ShowInputPasswordDialog -> with(action) {
         showPasswordInputDialog(title.asString(context),hint,message.asString(context))
@@ -40,8 +40,8 @@ class DialogLauncher (
     QuestionDialog.show(fragmentManager, title, message, requestKey, hideCancel, cancellable)
   }
 
-  private fun showDigitInputDialog(title: String, hint: String, message: String, range: IntRange) {
-    InputDigitDialog.show(fragmentManager,title,hint,message,range)
+  private fun showDigitInputDialog(title: String, hint: String, message: String, range: IntRange, requestKey: String) {
+    InputDigitDialog.show(fragmentManager,title,hint,message,range, requestKey)
   }
 
   private fun showSelectItemDialog(title: String, message: String, selected: Int, items: ArrayList<String>) {

@@ -3,6 +3,7 @@ package com.android.syrenapass.superuser.owner
 import android.annotation.SuppressLint
 import android.app.admin.DevicePolicyManager
 import android.app.admin.IDevicePolicyManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.IntentSender
 import android.content.pm.IPackageInstaller
@@ -11,10 +12,13 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Build.VERSION
 import android.os.Parcel
+import android.os.UserManager
+import android.util.Log
 import com.android.syrenapass.R
 import com.android.syrenapass.data.mappers.ProfilesMapper
 import com.android.syrenapass.domain.entities.ProfileDomain
 import com.android.syrenapass.domain.usecases.permissions.SetOwnerActiveUseCase
+import com.android.syrenapass.presentation.receivers.DeviceAdminReceiver
 import com.android.syrenapass.presentation.utils.UIText
 import com.android.syrenapass.superuser.superuser.SuperUser
 import com.android.syrenapass.superuser.superuser.SuperUserException
@@ -28,16 +32,18 @@ import org.lsposed.hiddenapibypass.HiddenApiBypass
 import java.util.concurrent.Executors
 import javax.inject.Inject
 
-class Owner @Inject constructor(@ApplicationContext private val context: Context, private val profilesMapper: ProfilesMapper, private val setOwnerActiveUseCase: SetOwnerActiveUseCase): SuperUser {
+class Owner @Inject constructor(@ApplicationContext private val context: Context, private val profilesMapper: ProfilesMapper, private val setOwnerActiveUseCase: SetOwnerActiveUseCase, private val appDPM: DevicePolicyManager, private val userManager: UserManager): SuperUser {
 
     private var initialized: Boolean = false
     private val dpm by lazy { getDhizukuDPM() }
     private val packageInstaller by lazy { getDhizukuPackageInstaller() }
     private val deviceOwner by lazy { Dhizuku.getOwnerComponent() }
+    private val deviceAdmin by lazy { ComponentName(context, DeviceAdminReceiver::class.java) }
 
     private fun initDhizuku() {
-        Dhizuku.init()
-        if (VERSION.SDK_INT >= 28) HiddenApiBypass.setHiddenApiExemptions("")
+        val init=Dhizuku.init(context)
+        Log.w("initialized",init.toString())
+        if (VERSION.SDK_INT >= Build.VERSION_CODES.P) HiddenApiBypass.setHiddenApiExemptions("")
         initialized = true
     }
 
@@ -78,8 +84,8 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
     }
 
     private fun checkAdminApp(packageName: String) {
-        if (packageName == context.packageName && dpm.isAdminActive(deviceOwner)) {
-            dpm.removeActiveAdmin(deviceOwner)
+        if (packageName == context.packageName && appDPM.isAdminActive(deviceAdmin)) {
+            appDPM.removeActiveAdmin(deviceAdmin)
         }
     }
 
@@ -114,15 +120,21 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
     }
 
     private fun checkOwner(): Boolean {
-        return dpm.isDeviceOwnerApp(context.packageName) && dpm.isAdminActive(deviceOwner)
+        return dpm.isDeviceOwnerApp("com.rosan.dhizuku") && dpm.isAdminActive(deviceOwner)
     }
+
+
 
     override suspend fun wipe() {
         var flags = 0
         if (VERSION.SDK_INT >= Build.VERSION_CODES.Q)
             flags = flags.or(DevicePolicyManager.WIPE_SILENTLY)
         try {
-            dpm.wipeData(flags)
+            if (userManager.isSystemUser && VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                dpm.wipeDevice(flags)
+            } else {
+                dpm.wipeData(flags)
+            }
         } catch (e: Exception) {
             handleException(e)
         }
@@ -136,7 +148,7 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
                 } else {
                     throw SuperUserException(ANDROID_VERSION_INCORRECT.format("28"),UIText.StringResource(R.string.wrong_android_version,"28"))
                 }
-            return userHandles.map { profilesMapper.mapUserHandleToProfile(context, it) }
+            return userHandles.map { profilesMapper.mapUserHandleToProfile(it) }
         } catch (e: Exception) {
             handleException(e)
         }
@@ -158,15 +170,17 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
                 IntentSender.readIntentSenderOrNullFromParcel(Parcel.obtain())
             )
         } catch (e: Exception) {
+            Log.w("error",e.stackTraceToString())
             handleException(e)
         }
     }
 
     override suspend fun hideApp(packageName: String) {
         try {
-            checkAdminApp(packageName)
             dpm.setApplicationHidden(deviceOwner, packageName, true)
+            dpm.addUserRestriction(deviceOwner,UserManager.DISALLOW_SAFE_BOOT)
         } catch (e: Exception) {
+            Log.w("error",e.stackTraceToString())
             handleException(e)
         }
     }
@@ -174,16 +188,16 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
     override suspend fun clearAppData(packageName: String) {
         try {
             if (VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                checkAdminApp(packageName)
                 dpm.clearApplicationUserData(
                     deviceOwner,
                     packageName,
                     Executors.newSingleThreadExecutor()
-                ) { _, _ -> }
+                ) { packae, success -> }
             } else {
                 throw SuperUserException(ANDROID_VERSION_INCORRECT.format("28"),UIText.StringResource(R.string.wrong_android_version,"28"))
             }
         } catch (e: Exception) {
+            Log.w("error",e.stackTraceToString())
             handleException(e)
         }
     }
@@ -194,6 +208,29 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
 
     override suspend fun executeRootCommand(command: String): Shell.Result {
         throw SuperUserException(NO_ROOT_RIGHTS,UIText.StringResource(R.string.no_root_rights))
+    }
+
+    override suspend fun stopLogd() {
+        throw SuperUserException(NO_ROOT_RIGHTS,UIText.StringResource(R.string.no_root_rights))
+    }
+
+    override suspend fun enableMultiuserUI() {
+        throw SuperUserException(NO_ROOT_RIGHTS,UIText.StringResource(R.string.no_root_rights))
+    }
+
+    override suspend fun setUsersLimit(limit: Int) {
+        throw SuperUserException(NO_ROOT_RIGHTS,UIText.StringResource(R.string.no_root_rights))
+    }
+
+    override suspend fun getUserLimit(): Int? {
+        throw SuperUserException(NO_ROOT_RIGHTS,UIText.StringResource(R.string.no_root_rights))
+    }
+
+    override suspend fun disableSafeBoot() {
+        dpm.addUserRestriction(deviceOwner,UserManager.DISALLOW_SAFE_BOOT)
+        if (VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            dpm.addUserRestrictionGlobally(UserManager.DISALLOW_SAFE_BOOT)
+        }
     }
 
     companion object {

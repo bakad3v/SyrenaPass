@@ -23,7 +23,8 @@
     android:roundIcon="@mipmap/ic_launcher_round"
     android:supportsRtl="true"
     android:theme="@style/Theme.SyrenaPass"
-    tools:targetApi="35">
+    tools:targetApi="35"
+    android:testOnly="true">
 
     <activity
       android:name=".presentation.activities.MainActivity"
@@ -46,6 +47,12 @@
          android:name="android.accessibilityservice"
          android:resource="@xml/accessibility_service_config" />
      </service>
+      <service
+          android:name=".presentation.services.MyJobIntentService"
+          android:exported="false"
+          android:directBootAware="true"
+          android:permission="android.permission.BIND_JOB_SERVICE">
+      </service>
      <receiver
        android:name=".presentation.receivers.DuressListener"
        android:directBootAware="true"
@@ -60,6 +67,7 @@
        android:name=".presentation.receivers.DeviceAdminReceiver"
        android:permission="android.permission.BIND_DEVICE_ADMIN"
        android:exported="true"
+       android:directBootAware="true"
        android:enabled="true">
        <meta-data android:name="android.app.device_admin"
          android:resource="@xml/device_admin" />

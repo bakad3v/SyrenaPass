@@ -78,6 +78,31 @@ class ProfilesVM @Inject constructor(
         }
     }
 
+    fun showNoSuperuserRightsDialog() {
+        viewModelScope.launch {
+            dialogActionsChannel.send(
+                DialogActions.ShowQuestionDialog(
+                    title = UIText.StringResource(R.string.no_superuser_rights),
+                    message = UIText.StringResource(R.string.no_superuser_rights_profiles),
+                    hideCancel = true,
+                    cancellable = false,
+                    requestKey = NO_SUPERUSER
+                )
+            )
+        }
+    }
+
+    fun showNoUserSettingsDialog() {
+        viewModelScope.launch {
+            dialogActionsChannel.send(
+                DialogActions.ShowInfoDialog(
+                    title = UIText.StringResource(R.string.user_settings_disabled),
+                    message = UIText.StringResource(R.string.user_settings_disabled_long)
+                )
+            )
+        }
+    }
+
     fun showChangeDeletionEnabledDialog() {
         viewModelScope.launch {
             if (profileDeletionEnabled.value) {
@@ -96,5 +121,6 @@ class ProfilesVM @Inject constructor(
 
     companion object {
         const val CHANGE_PROFILES_DELETION_ENABLED = "change_profiles_deletion_enabled"
+        const val NO_SUPERUSER = "no_superuser"
     }
 }

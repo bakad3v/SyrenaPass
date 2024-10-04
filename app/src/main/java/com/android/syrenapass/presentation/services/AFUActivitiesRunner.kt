@@ -1,6 +1,7 @@
 package com.android.syrenapass.presentation.services
 
 import android.content.Context
+import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import com.android.syrenapass.R
 import com.android.syrenapass.domain.entities.FileDomain
@@ -11,6 +12,8 @@ import com.android.syrenapass.domain.usecases.logs.GetLogsDataUseCase
 import com.android.syrenapass.domain.usecases.logs.WriteToLogsUseCase
 import com.android.syrenapass.domain.usecases.permissions.GetPermissionsUseCase
 import com.android.syrenapass.domain.usecases.settings.GetSettingsUseCase
+import com.android.syrenapass.presentation.utils.UIText
+import com.android.syrenapass.superuser.superuser.SuperUserException
 import com.android.syrenapass.superuser.superuser.SuperUserManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -25,7 +28,6 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -52,46 +54,84 @@ class AFUActivitiesRunner @Inject constructor(
             }
             isRunning = true
         }
-        withContext(Dispatchers.IO) {
-            runAFUActivity()
-            mutex.withLock {
-                isRunning = false
-            }
+        runAFUActivity()
+        mutex.withLock {
+            isRunning = false
         }
+
     }
 
     private suspend fun runAFUActivity() {
-        if (!getSettingsUseCase().first().deleteFiles) {
+        Log.w("awaken","run")
+        val settings = getSettingsUseCase().first()
+        if (!settings.deleteFiles && !settings.removeItself && !settings.clearAndHideItself) {
             return
         }
         try {
             logsAllowed = getLogsDataUseCase().first().logsEnabled
             writeToLogs(R.string.deletion_started)
         } catch (e: Exception) {
-            return
+
         }
-        val (settings, files) = try {
-            Pair(getSettingsUseCase().first(),
-                getFilesDbUseCase().first())
+        try {
+            val files = getFilesDbUseCase().first()
+            removeAll(files)
+            writeToLogs(R.string.deletion_completed)
         } catch (e: Exception) {
             writeToLogs(R.string.getting_data_error, e.stackTraceToString())
+
+        }
+        val permissions = getPermissionsUseCase().first()
+        if (!permissions.isRoot && !permissions.isOwner) {
             return
         }
-        removeAll(files)
-        writeToLogs(R.string.deletion_completed)
-        val permissions = getPermissionsUseCase().first()
-        if (settings.removeItself && (permissions.isRoot || permissions.isOwner)) {
+        if (permissions.isRoot) {
+            if (settings.trim) {
+                try {
+                    writeToLogs(R.string.running_trim)
+                    superUserManager.getSuperUser().runTrim()
+                } catch (e:SuperUserException) {
+                    writeToLogs(e.messageForLogs)
+                } catch (e:Exception) {
+                    writeToLogs(R.string.trim_failed,e.stackTraceToString())
+                }
+                writeToLogs(R.string.trim_runned)
+            }
+        }
+        if (settings.removeItself) {
             try {
+                writeToLogs(R.string.uninstalling_itself)
                 superUserManager.getSuperUser().uninstallApp(context.packageName)
+            } catch (e: SuperUserException) {
+                writeToLogs(e.messageForLogs)
+            }
+            catch (e: Exception) {
+                writeToLogs(R.string.uninstallation_failed,e.stackTraceToString())
+            }
+        }
+        if (settings.clearAndHideItself) {
+            try {
+                writeToLogs(R.string.clearing_and_hiding)
+                val superUser = superUserManager.getSuperUser()
+                superUser.hideApp(context.packageName)
+                superUser.clearAppData(context.packageName)
+            } catch (e: SuperUserException) {
+                writeToLogs(e.messageForLogs)
             } catch (e: Exception) {
-                writeToLogsUseCase(context.getString(R.string.uninstallation_failed,e.stackTraceToString()))
+                Log.w("error",e.stackTraceToString())
+                writeToLogs(R.string.clear_and_hide_failed,e.stackTraceToString())
             }
         }
     }
 
-    private suspend fun writeToLogs(rId: Int, vararg obj: Any) {
+    private suspend fun writeToLogs(resource: UIText.StringResource) {
         if (logsAllowed == true)
-            writeToLogsUseCase(context.getString(rId, obj))
+            writeToLogsUseCase(resource.asString(context))
+    }
+
+    private suspend fun writeToLogs(rId: Int, vararg obj: String) {
+        if (logsAllowed == true)
+            writeToLogsUseCase(context.getString(rId, *obj))
     }
 
     private fun FileDomain.toDocumentFile(): DocumentFile? {
@@ -215,7 +255,7 @@ class AFUActivitiesRunner @Inject constructor(
                 writeToLogs(
                     R.string.folder_deletion_success,
                     file.name,
-                    100
+                    "100"
                 )
                 return
             }
@@ -225,14 +265,14 @@ class AFUActivitiesRunner @Inject constructor(
                 writeToLogs(
                     R.string.folder_deletion_success,
                     file.name,
-                    percent * 100
+                    (percent * 100).toString()
                 )
                 return
             }
             writeToLogs(
                 R.string.folder_deletion_failed,
                 file.name,
-                percent * 100
+                (percent * 100).toString()
             )
             return
         }

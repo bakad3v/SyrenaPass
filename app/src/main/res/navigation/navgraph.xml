@@ -6,8 +6,8 @@
     android:id="@+id/passFragmentNav"
     android:name="com.android.syrenapass.presentation.fragments.PassFragment">
     <action
-        android:id="@+id/action_passFragment2_to_setupFilesFragment2"
-        app:destination="@id/setupFilesFragment"
+        android:id="@+id/action_passFragmentNav_to_settingsFragment"
+        app:destination="@id/settingsFragment"
         app:popUpTo="@id/passFragmentNav"
         app:popUpToInclusive="true" />
   </fragment>

@@ -2,7 +2,7 @@ package com.android.syrenapass.di
 
 import android.app.admin.DevicePolicyManager
 import android.content.Context
-import dagger.Binds
+import android.os.UserManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,6 +18,11 @@ class AdminModule {
     fun provideDevicePolicyManager(@ApplicationContext context: Context): DevicePolicyManager {
       return context.getSystemService(DevicePolicyManager::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun provideUserManager (@ApplicationContext context: Context): UserManager =
+        context.getSystemService(UserManager::class.java)
 
 
 }

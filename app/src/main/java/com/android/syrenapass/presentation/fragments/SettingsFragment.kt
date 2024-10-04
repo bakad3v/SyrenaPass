@@ -1,5 +1,6 @@
 package com.android.syrenapass.presentation.fragments
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -28,9 +29,15 @@ import com.android.syrenapass.presentation.dialogs.QuestionDialog
 import com.android.syrenapass.presentation.states.ActivityState
 import com.android.syrenapass.presentation.viewmodels.SettingsVM
 import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.BRUTEFORCE_DIALOG
+import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.CHANGE_USER_LIMIT_DIALOG
+import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.CLEAR_AND_HIDE_DIALOG
 import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.INSTALL_DIZUKU_DIALOG
+import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.LOGD_ON_BOOT_DIALOG
+import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.LOGD_ON_START_DIALOG
+import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.MAX_PASSWORD_ATTEMPTS_DIALOG
 import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.MOVE_TO_ACCESSIBILITY_SERVICE
 import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.MOVE_TO_ADMIN_SETTINGS
+import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.OPEN_MULTIUSER_SETTINGS_DIALOG
 import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.SELF_DESTRUCTION_DIALOG
 import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.TRIM_DIALOG
 import com.android.syrenapass.presentation.viewmodels.SettingsVM.Companion.USB_DIALOG
@@ -182,12 +189,42 @@ class SettingsFragment : Fragment() {
       viewModel.showRunOnUSBConnectionDialog()
     }
 
+    val switchLogdOnStartListener = CompoundButton.OnCheckedChangeListener { switch, checked ->
+      if (!checked) {
+        viewModel.setLogdOnStartStatus(false)
+        return@OnCheckedChangeListener
+      }
+      switch.isChecked = false
+      viewModel.showLogdOnStartDialog()
+    }
+
+    val switchLogdOnBootListener = CompoundButton.OnCheckedChangeListener { switch, checked ->
+      if (!checked) {
+        viewModel.setLogdOnBootStatus(false)
+        return@OnCheckedChangeListener
+      }
+      switch.isChecked = false
+      viewModel.showLogdOnBootDialog()
+    }
+
+    val switchClearAndHideListener = CompoundButton.OnCheckedChangeListener { switch, checked ->
+      if (!checked) {
+        viewModel.setClearAndHide(false)
+        return@OnCheckedChangeListener
+      }
+      switch.isChecked = false
+      viewModel.showClearAndHideDialog()
+    }
+
     viewLifecycleOwner.launchLifecycleAwareCoroutine {
       viewModel.settingsState.collect {
         binding.switchWipe.setCheckedProgrammatically(it.wipe,switchWipeListener)
         binding.switchTrim.setCheckedProgrammatically(it.trim, switchTrimListener)
         binding.switchSelfDestruct.setCheckedProgrammatically(it.removeItself, switchSelfDestructListener)
         binding.switchAccessibility.setCheckedProgrammatically(it.serviceWorking,switchAccessibilityServiceListener)
+        binding.switchLogdOnBoot.setCheckedProgrammatically(it.stopLogdOnBoot, switchLogdOnBootListener)
+        binding.switchLogdOnStart.setCheckedProgrammatically(it.stopLogdOnStart, switchLogdOnStartListener)
+        binding.switchClearAndHide.setCheckedProgrammatically(it.clearAndHideItself, switchClearAndHideListener)
         binding.showMenu.text = when(it.theme) {
           Theme.SYSTEM_THEME -> requireContext().getString(R.string.system_theme)
           Theme.DARK_THEME -> requireContext().getString(R.string.dark_theme)
@@ -215,6 +252,9 @@ class SettingsFragment : Fragment() {
     binding.setupPassword.setOnClickListener {
       viewModel.showPasswordInput()
     }
+    binding.usersLimit.setOnClickListener {
+      viewModel.showChangeUserLimitDialog()
+    }
     binding.switchAccessibility.setOnCheckedChangeListener(switchAccessibilityServiceListener)
     binding.switchAdmin.setOnCheckedChangeListener(switchAdminListener)
     binding.switchDhizuku.setOnCheckedChangeListener(switchDhizukuListener)
@@ -224,6 +264,15 @@ class SettingsFragment : Fragment() {
     binding.switchSelfDestruct.setOnCheckedChangeListener(switchSelfDestructListener)
     binding.switchUsbConnection.setOnCheckedChangeListener(switchUsbListener)
     binding.switchBruteforce.setOnCheckedChangeListener(switchBruteforceListener)
+    binding.switchLogdOnBoot.setOnCheckedChangeListener(switchLogdOnBootListener)
+    binding.switchLogdOnStart.setOnCheckedChangeListener(switchLogdOnStartListener)
+    binding.switchClearAndHide.setOnCheckedChangeListener(switchClearAndHideListener)
+    binding.allowMultiuserUi.setOnClickListener {
+      viewModel.enableMultiuserUI()
+    }
+    binding.disableSafeBoot.setOnClickListener {
+      viewModel.disableSafeBoot()
+    }
     binding.allowedAttempts.setOnClickListener {
       viewModel.editMaxPasswordAttemptsDialog()
     }
@@ -239,6 +288,13 @@ class SettingsFragment : Fragment() {
   private fun openDhizukuLink() {
     val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/iamr0s/Dhizuku"))
     startActivity(browserIntent)
+  }
+
+  private fun createProfile() {
+    try {
+      startActivity(Intent("android.settings.USER_SETTINGS"))
+    } catch (e: ActivityNotFoundException) {
+    }
   }
 
   /**
@@ -314,11 +370,48 @@ class SettingsFragment : Fragment() {
     ) {
       viewModel.setBruteforceProtection(true)
     }
+    QuestionDialog.setupListener(
+      parentFragmentManager,
+      LOGD_ON_START_DIALOG,
+      viewLifecycleOwner
+    ) {
+      viewModel.setLogdOnStartStatus(true)
+    }
+    QuestionDialog.setupListener(
+      parentFragmentManager,
+      LOGD_ON_BOOT_DIALOG,
+      viewLifecycleOwner
+    ) {
+      viewModel.setLogdOnBootStatus(true)
+    }
+    QuestionDialog.setupListener(
+      parentFragmentManager,
+      CLEAR_AND_HIDE_DIALOG,
+      viewLifecycleOwner
+    ) {
+      viewModel.setClearAndHide(true)
+    }
     InputDigitDialog.setupListener(
       parentFragmentManager,
-      viewLifecycleOwner
+      viewLifecycleOwner,
+      MAX_PASSWORD_ATTEMPTS_DIALOG
     ) { limit ->
       viewModel.setBruteForceLimit(limit)
+    }
+    InputDigitDialog.setupListener(
+      parentFragmentManager,
+      viewLifecycleOwner,
+      CHANGE_USER_LIMIT_DIALOG
+    ) {
+        limit ->
+      viewModel.setUserLimit(limit)
+    }
+    QuestionDialog.setupListener(
+      parentFragmentManager,
+      OPEN_MULTIUSER_SETTINGS_DIALOG,
+      viewLifecycleOwner
+    ) {
+      createProfile()
     }
   }
 

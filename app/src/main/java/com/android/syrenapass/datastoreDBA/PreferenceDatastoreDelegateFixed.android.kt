@@ -13,6 +13,7 @@ import kotlin.reflect.KProperty
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import java.io.File
 
 /**
  * Creates a property delegate for a single process DataStore. This should only be called once
@@ -52,13 +53,13 @@ fun preferencesDataStoreDirectBootAware(
     produceMigrations: (Context) -> List<DataMigration<Preferences>> = { listOf() },
     scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 ): ReadOnlyProperty<Context, DataStore<Preferences>> {
-    return PreferenceDataStoreSingletonDelegate(name, corruptionHandler, produceMigrations, scope)
+    return DBAPreferenceDataStoreSingletonDelegate(name, corruptionHandler, produceMigrations, scope)
 }
 
 /**
  * Delegate class to manage Preferences DataStore as a singleton.
  */
-internal class PreferenceDataStoreSingletonDelegate internal constructor(
+internal class DBAPreferenceDataStoreSingletonDelegate internal constructor(
     private val name: String,
     private val corruptionHandler: ReplaceFileCorruptionHandler<Preferences>?,
     private val produceMigrations: (Context) -> List<DataMigration<Preferences>>,
@@ -87,7 +88,7 @@ internal class PreferenceDataStoreSingletonDelegate internal constructor(
                     migrations = produceMigrations(deviceContext),
                     scope = scope
                 ) {
-                    deviceContext.preferencesDataStoreFile(name)
+                    File(deviceContext.filesDir, "datastore/$name.preferences_pb")
                 }
             }
             INSTANCE!!
