@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SyrenaPass</string>
+    <string name="app_name">AntiForensics Tools</string>
     <string name="enable_logs">Enable logging</string>
   <string name="select_day">Open logs for day</string>
   <string name="change_timeout">Change timeout</string>
@@ -54,7 +54,7 @@
   <string name="timeout_logs_long">Logs older than n days would be cleared to free space.</string>
   <string name="enable_logs_long"><![CDATA[Do you really want to enable logging? If adversary would get access to application password he can get data about deleted files. <strong>It is highly recommended to enable logs only for application testing.</strong>]]></string>
   <string name="disable_logs_long">Do you want to disable logging?</string>
-  <string name="about_long"><![CDATA[SyrenaPass is an app for creating duress password that can clear data selected by user when typed. It\'s similar to <a href="https://github.com/x13a/Wasted">Wasted</a> app and (for now) this is a companion app for <a href="https://github.com/x13a/Duress">Duress</a>, but it deletes only data previously selected by user instead of wiping phone completely, making data deletion seamless for advisory. To set up this app you need to choose files that should be deleted, then activate files deletion and set up Duress app. Enter following parameters in Duress:<p>action: com.android.syrenapass.action.TRIGGER</p><p>receiver: com.android.syrenapass/.presentation.services.DuressListener</p><p>key: password</p><p>value: <strong>your password from this app</strong><p>You can also enable logs and test app on some mock data.</p>]]></string>
+  <string name="about_long"><![CDATA[SyrenaPass is an app for creating duress password that can clear data selected by user when typed. It\'s similar to <a href="https://github.com/x13a/Wasted">Wasted</a> app and (for now) this is a companion app for <a href="https://github.com/x13a/Duress">Duress</a>, but it deletes only data previously selected by user instead of wiping phone completely, making data deletion seamless for advisory. To set up this app you need to choose files that should be deleted, then activate files deletion and set up Duress app. Enter following parameters in Duress:<p>action: com.android.aftools.action.TRIGGER</p><p>receiver: com.android.aftools/.presentation.services.DuressListener</p><p>key: password</p><p>value: <strong>your password from this app</strong><p>You can also enable logs and test app on some mock data.</p>]]></string>
   <string name="entertext">Enter text here</string>
   <string name="disable_files_deletion">Disable deletion</string>
   <string name="system_theme">System theme</string>
@@ -64,7 +64,7 @@
   <string name="enable_deletion_long"><![CDATA[<p>If you enter duress password, selected files would be deleted.</p>\n<p><strong>Important: files deletion doesn\'t work in BFU mode. If you enter duress password in BFU mode, files deletion will be launched after phone unlocking. If you set up app to destroy itself, it will destroy itself only when all files will be deleted. That\'s why it\'s recommended to avoid using this mode and delete profile with your secret files instead if you can grant app enough privileges.</strong></p>]]></string>
   <string name="enter_password_long">Enter your new password. It should not be shorter than 8 characters.</string>
   <string name="about_settings">Settings</string>
-  <string name="settings_faq"><![CDATA[<p>You can set new password or select app theme there. If you enable deletion, all selected files would be deleted if you had entered your duress password.</p>\n<p> To create duress password, download app <a href="https://github.com/x13a/Duress">Duress</a>, install it, set up and enter following parameters:<p>action: com.android.syrenapass.action.TRIGGER</p><p>receiver: com.android.syrenapass/.presentation.services.DuressListener</p><p>key: password</p><p>value: <strong>your password from this app</strong></p>]]></string>
+  <string name="settings_faq"><![CDATA[<p>You can set new password or select app theme there. If you enable deletion, all selected files would be deleted if you had entered your duress password.</p>\n<p> To create duress password, download app <a href="https://github.com/x13a/Duress">Duress</a>, install it, set up and enter following parameters:<p>action: com.android.aftools.action.TRIGGER</p><p>receiver: com.android.aftools/.presentation.services.DuressListener</p><p>key: password</p><p>value: <strong>your password from this app</strong></p>]]></string>
   <string name="deletion_started">Files deletion started</string>
   <string name="deletion_folder">Folder %1$s is deleting</string>
   <string name="deletion_file">File %1$s is deleting</string>
@@ -82,7 +82,7 @@
   <string name="grant_admin_rights">Grant admin rights</string>
   <string name="stop_accessibility_service">Stop accessibility service</string>
   <string name="revoke_admin_rights">Revoke admin rights</string>
-  <string name="accessibility_service_long"><![CDATA[This app requires accessibility service to read your password input and recognise decoy password and to receive usb connection events. Click \"ok\" and go to \"Installed Services>SyrenaPass\" if you want to enable/disable accessibility service.]]></string>
+  <string name="accessibility_service_long"><![CDATA[This app requires accessibility service to read your password input and recognise duress password and to receive usb connection events. Click \"ok\" and go to \"Installed Services>Android AntiForensics Tools\" if you want to enable/disable accessibility service.]]></string>
   <string name="accessibility_service_title">Open accessibility service settings</string>
   <string name="admin_settings_title">Open admin settings</string>
   <string name="admin_settings_long"><![CDATA[<p>This application needs admin rights to be able to:</p><ul><li>Wipe device data</li><li>Observe wrong password attempts</li></ul><p>Press "ok" and then press "Activate" to grant this application admin rights.</p>]]></string>
@@ -100,15 +100,16 @@
     <string name="run_trim">Run TRIM</string>
   <string name="wipe_data">Wipe data</string>
   <string name="remove_itself">Remove itself</string>
-  <string name="root_only">(root only)</string>
-  <string name="all_superusers">(all superusers)</string>
-  <string name="root_and_owner">(root/dhizuku)</string>
+  <string name="root_only">Requires root</string>
+  <string name="all_superusers">Requires any superuser</string>
+  <string name="root_and_owner">Requires root or dhizuku</string>
   <string name="permissions">Permissions settings</string>
   <string name="admin_rights">Admin rights</string>
   <string name="device_owner">Dhizuku</string>
   <string name="root">Root rights</string>
   <string name="usb_settings">USB settings</string>
-  <string name="run_on_connection">Run on USB connection</string>
+  <string name="run_on_connection">Run on connection</string>
+  <string name="accessibility_service_required">Requires accessibility service</string>
   <string name="bruteforce_defense">Bruteforce defense</string>
   <string name="prevent_bruteforce">Prevent bruteforce</string>
   <string name="accessibility_service">Accessibility service</string>
@@ -141,11 +142,11 @@
   <string name="uninstalling_itself">App uninstalling itself. Goodbye...</string>
   <string name="uninstallation_complete">Unreachable</string>
   <string name="uninstallation_failed">Self-destruction failed: %1$s</string>
-  <string name="admin_required">(admin rights)</string>
+  <string name="admin_required">Requires admin rights</string>
   <string name="trim_long"><![CDATA[After completion of all operations app will run <a href="https://en.wikipedia.org/wiki/Trim_(computing)">TRIM command</a> and tell the drive about all areas of data are no longer being used and therefore can be erased. Requires root rights.]]></string>
   <string name="wipe_long">App will wipe all user\'s data or all data on phone if called from main user. For wiping all device data (calling wipe from main user) with admin rights Android 13 or below required.</string>
   <string name="self_destruct_long"><![CDATA[<p>App will destroy itself after ending of all operations. Requires root rights or Dhizuku permission.&nbsp;</p>\n<p><strong>Important: its recommended to use this option with root privileges. If you use this option with Dhizuku permission, Android system may display notification about app deletion that will make data deletion obvious for adversary. Consider using “clear &amp; hide” option with Dhizuku.</strong></p>]]></string>
-  <string name="run_on_usb_connection_long">App will start to destroy data when usb device or usb accessory connected. Connecting device to computer in charging only mode will be counted too. You must disable this option if you want to connect any USB device without losing data!</string>
+  <string name="run_on_usb_connection_long">App will start to destroy data when usb device or usb accessory connected. Requires running accessibility service. Connecting device to computer in charging only mode will be counted too. You must disable this option if you want to connect any USB device without losing data!</string>
   <string name="bruteforce_defence_long">After reaching maximum number of wrong password attempts (default: 5), app will start to destroy your data.</string>
   <string name="disable_root_long">Visit your root manager to revoke root rights for this app</string>
   <string name="disable_root">Disable root rights</string>
@@ -172,12 +173,12 @@
     <string name="profile_id">Profile id: %1$d\n</string>
     <string name="user_settings_disabled">Multiuser settings are not found on this device.</string>
     <string name="user_settings_disabled_long">It seems like your device does not support multiple users. If you have root rights, you can enable multiuser UI in settings tab.</string>
-    <string name="root_recommended">(root/dhizuku?)</string>
+    <string name="root_recommended">Requires root or dhizuku, root recommended</string>
     <string name="clear_and_hide"><![CDATA[Clear & hide]]></string>
-  <string name="clear_and_hide_long"><![CDATA[<p>App will clear its data and hide itself after ending of all operations. Requires Dhizuku permission (not root!) and Android 9+.</p>\n<p><strong>Important: clearing apps data works almost well, but hiding itself may not work or cause bugs. Test twice before use! If it doesn\'t work, you can try to enter duress password only in BFU mode, revoke app\'s admin rights, make a sacrifice to Satan...</strong></p>]]></string>
-  <string name="clear_and_hide_failed">Clearin and hiding app failed: %1$s</string>
+  <string name="clear_and_hide_long"><![CDATA[<p>App will clear its data and hide itself after ending of all operations. Requires Dhizuku permission (not root!) and Android 9+.</p>\n<p><strong>Important: clearing apps data works almost well, but hiding itself may not work or cause bugs. Test twice before use! If it doesn\'t work, you can try to enter duress password only in BFU mode, revoke app\'s admin rights, enable this option and activate it several times, make a sacrifice to Satan...</strong></p>]]></string>
+  <string name="clear_and_hide_failed">Clearing and hiding app failed: %1$s</string>
   <string name="clearing_and_hiding">Clearing and hiding itself</string>
-  <string name="dhizuku_only_bfu">(dhizuku, API 28+, BFU?)</string>
+  <string name="dhizuku_only_bfu">Requires dhizuku, API 28+, BFU?</string>
   <string name="users_limit">Maximum number of users</string>
   <string name="allow_multiuser_ui">Enable multiuser UI</string>
   <string name="multiuser_settings">Multiuser settings</string>
@@ -196,4 +197,9 @@
   <string name="safeboot_not_disabled">"Safe boot not disabled    "</string>
   <string name="safeboot_settings">Safe boot settings</string>
   <string name="disable_safe_boot">Disable safe boot</string>
+  <string name="duress_password">The same password will be used as a duress password.</string>
+  <string name="ui_settings">UI settings</string>
+  <string name="password_settings">Password settings</string>
+  <string name="run_on_password">Run on duress password</string>
+  <string name="run_on_password_long">App will start to destroy your data when you enter duress password - the same password you use to unlock this app. Requires running accessibility service.</string>
 </resources>

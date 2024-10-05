@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.android.syrenapass"
+    namespace = "com.android.aftools"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.android.syrenapass"
+        applicationId = "com.android.aftools"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
@@ -72,16 +72,13 @@ dependencies {
   implementation ("com.google.dagger:dagger:$daggerVersion")
   kapt ("com.google.dagger:dagger-compiler:$daggerVersion")
   implementation ("androidx.datastore:datastore-preferences:$datastoreVersion")
-  implementation ("androidx.work:work-runtime-ktx:$runtimeKtxVersion")
   implementation( "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
   implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
-  implementation ("org.signal:argon2:13.1@aar")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
   implementation("androidx.navigation:navigation-fragment-ktx:$navigationVersion")
   implementation("androidx.navigation:navigation-ui-ktx:$navigationVersion")
   implementation("org.lsposed.hiddenapibypass:hiddenapibypass:$hiddenApiBypassVersion")
   implementation("androidx.fragment:fragment-ktx:$fragmentVersion")
-  implementation ("androidx.hilt:hilt-work:$hiltworkerVersion")
   kapt ("androidx.hilt:hilt-compiler:$hiltworkerVersion")
   implementation ("com.github.topjohnwu.libsu:core:$libsuVersion")
   implementation( "androidx.security:security-crypto-ktx:$securityVersion")

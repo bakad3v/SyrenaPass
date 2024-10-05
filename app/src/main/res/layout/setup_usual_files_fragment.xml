@@ -7,7 +7,7 @@
 
     <variable
       name="viewmodel"
-      type="com.android.syrenapass.presentation.viewmodels.UsualFilesSettingsVM" />
+      type="com.android.aftools.presentation.viewmodels.UsualFilesSettingsVM" />
   </data>
 
   <androidx.constraintlayout.widget.ConstraintLayout

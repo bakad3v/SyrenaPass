@@ -4,7 +4,7 @@
     app:startDestination="@id/passFragmentNav">
   <fragment
     android:id="@+id/passFragmentNav"
-    android:name="com.android.syrenapass.presentation.fragments.PassFragment">
+    android:name="com.android.aftools.presentation.fragments.PassFragment">
     <action
         android:id="@+id/action_passFragmentNav_to_settingsFragment"
         app:destination="@id/settingsFragment"
@@ -13,19 +13,19 @@
   </fragment>
   <fragment
     android:id="@+id/setupFilesFragment"
-    android:name="com.android.syrenapass.presentation.fragments.SetupFilesFragment" />
+    android:name="com.android.aftools.presentation.fragments.SetupFilesFragment" />
   <fragment
     android:id="@+id/logsFragment"
-    android:name="com.android.syrenapass.presentation.fragments.LogsFragment" />
+    android:name="com.android.aftools.presentation.fragments.LogsFragment" />
   <fragment
     android:id="@+id/aboutFragment"
-    android:name="com.android.syrenapass.presentation.fragments.AboutFragment"
+    android:name="com.android.aftools.presentation.fragments.AboutFragment"
     android:label="AboutFragment" />
   <fragment
     android:id="@+id/settingsFragment"
-    android:name="com.android.syrenapass.presentation.fragments.SettingsFragment" />
+    android:name="com.android.aftools.presentation.fragments.SettingsFragment" />
   <fragment
       android:id="@+id/profilesFragment"
-      android:name="com.android.syrenapass.presentation.fragments.ProfilesFragment"
+      android:name="com.android.aftools.presentation.fragments.ProfilesFragment"
       android:label="ProfilesFragment" />
 </navigation>
