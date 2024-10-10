@@ -25,6 +25,10 @@ class MyJobIntentService: JobIntentService() {
             enqueueWork(context, MyJobIntentService::class.java, JOB_ID, Intent())
         }
     }
+
+    /**
+     * Triggers actions that can be started before the device is unlocked. If the device remains locked, it postpones other actions until unlocked, otherwise it performs them immediately.
+     */
     override fun onHandleWork(intent: Intent) {
         runBlocking {
             runnerBFU.runTask()

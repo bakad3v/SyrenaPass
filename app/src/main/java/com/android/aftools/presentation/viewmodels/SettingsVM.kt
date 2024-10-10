@@ -16,18 +16,24 @@ import com.android.aftools.domain.usecases.passwordManager.SetPasswordUseCase
 import com.android.aftools.domain.usecases.permissions.GetPermissionsUseCase
 import com.android.aftools.domain.usecases.permissions.SetOwnerActiveUseCase
 import com.android.aftools.domain.usecases.permissions.SetRootActiveUseCase
+import com.android.aftools.domain.usecases.settings.GetMultiuserUIUseCase
+import com.android.aftools.domain.usecases.settings.GetSafeBootRestrictionUseCase
 import com.android.aftools.domain.usecases.settings.SetMultiuserUIUseCase
 import com.android.aftools.domain.usecases.settings.GetSettingsUseCase
 import com.android.aftools.domain.usecases.settings.GetUserLimitUseCase
+import com.android.aftools.domain.usecases.settings.GetUserSwitchRestrictionUseCase
+import com.android.aftools.domain.usecases.settings.GetUserSwitcherStatusUseCase
 import com.android.aftools.domain.usecases.settings.SetClearAndHideUseCase
 import com.android.aftools.domain.usecases.settings.SetLogdOnBootUseCase
 import com.android.aftools.domain.usecases.settings.SetLogdOnStartUseCase
 import com.android.aftools.domain.usecases.settings.SetRemoveItselfUseCase
 import com.android.aftools.domain.usecases.settings.SetRunOnDuressUseCase
-import com.android.aftools.domain.usecases.settings.SetSafeBootUseCase
+import com.android.aftools.domain.usecases.settings.SetSafeBootRestrictionUseCase
 import com.android.aftools.domain.usecases.settings.SetThemeUseCase
 import com.android.aftools.domain.usecases.settings.SetTrimUseCase
 import com.android.aftools.domain.usecases.settings.SetUserLimitUseCase
+import com.android.aftools.domain.usecases.settings.SetUserSwitchRestrictionUseCase
+import com.android.aftools.domain.usecases.settings.SetUserSwitcherUseCase
 import com.android.aftools.domain.usecases.settings.SetWipeUseCase
 import com.android.aftools.domain.usecases.usb.GetUsbSettingsUseCase
 import com.android.aftools.domain.usecases.usb.SetUsbStatusUseCase
@@ -61,15 +67,23 @@ class SettingsVM @Inject constructor(
     private val setLogdOnBootUseCase: SetLogdOnBootUseCase,
     private val setLogdOnStartUseCase: SetLogdOnStartUseCase,
     private val setClearAndHideUseCase: SetClearAndHideUseCase,
-    private val enableMultiuserUIUseCase: SetMultiuserUIUseCase,
+    private val setMultiuserUIUseCase: SetMultiuserUIUseCase,
     private val getUserLimitUseCase: GetUserLimitUseCase,
     private val setUserLimitUseCase: SetUserLimitUseCase,
-    private val setSafeBootUseCase: SetSafeBootUseCase,
+    private val setSafeBootRestrictionUseCase: SetSafeBootRestrictionUseCase,
     private val setRunOnDuressUseCase: SetRunOnDuressUseCase,
+    private val setUserSwitcherUseCase: SetUserSwitcherUseCase,
+    private val getSafeBootRestrictionUseCase: GetSafeBootRestrictionUseCase,
+    private val setUserSwitchRestrictionUseCase: SetUserSwitchRestrictionUseCase,
+    private val getUserSwitcherStatusUseCase: GetUserSwitcherStatusUseCase,
+    private val getUserSwitchRestrictionUseCase: GetUserSwitchRestrictionUseCase,
+    private val getMultiuserUIUseCase: GetMultiuserUIUseCase,
     getPermissionsUseCase: GetPermissionsUseCase,
     getUSBSettingsUseCase: GetUsbSettingsUseCase,
     getBruteforceSettingsUseCase: GetBruteforceSettingsUseCase
 ) : ViewModel() {
+
+    var switchesInitialized: Boolean = false
 
     val settingsActionsFlow = settingsActionChannel.receiveAsFlow()
 
@@ -107,36 +121,76 @@ class SettingsVM @Inject constructor(
         }
     }
 
+    private fun showQuestionDialog(
+        title: UIText.StringResource,
+        message: UIText.StringResource,
+        requestKey: String
+    ) {
+        viewModelScope.launch {
+            showQuestionDialogSuspend(
+                title, message, requestKey
+            )
+        }
+    }
+
+    private suspend fun showQuestionDialogSuspend(
+        title: UIText.StringResource,
+        message: UIText.StringResource,
+        requestKey: String
+    ) {
+        settingsActionChannel.send(
+            DialogActions.ShowQuestionDialog(
+                title, message, requestKey
+            )
+        )
+    }
+
+    private fun showInfoDialog(
+        title: UIText.StringResource,
+        message: UIText.StringResource
+    ) {
+        viewModelScope.launch {
+            showInfoDialogSuspend(
+                title, message
+            )
+        }
+    }
+
+    private suspend fun showInfoDialogSuspend(
+        title: UIText.StringResource,
+        message: UIText.StringResource,
+    ) {
+        settingsActionChannel.send(
+            DialogActions.ShowInfoDialog(
+                title, message
+            )
+        )
+    }
+
     fun setUserLimit(limit: Int) {
         viewModelScope.launch {
             try {
                 setUserLimitUseCase(limit)
             } catch (e: SuperUserException) {
-                settingsActionChannel.send(
-                    DialogActions.ShowInfoDialog(
-                        title = UIText.StringResource(R.string.user_limit_not_changed),
-                        message = e.messageForLogs
-                    )
+                showInfoDialogSuspend(
+                    title = UIText.StringResource(R.string.user_limit_not_changed),
+                    message = e.messageForLogs
                 )
             }
         }
     }
 
     private fun cantGetUserLimit(message: UIText.StringResource) {
-        viewModelScope.launch {
-            settingsActionChannel.send(
-                DialogActions.ShowInfoDialog(
-                    title = UIText.StringResource(R.string.cant_get_user_limit),
-                    message = message
-                )
-            )
-        }
+        showInfoDialog(
+            title = UIText.StringResource(R.string.cant_get_user_limit),
+            message = message
+        )
     }
 
     fun showChangeUserLimitDialog() {
         viewModelScope.launch {
             val hint = try {
-                 getUserLimitUseCase()
+                getUserLimitUseCase()
             } catch (e: SuperUserException) {
                 cantGetUserLimit(e.messageForLogs)
                 return@launch
@@ -163,27 +217,19 @@ class SettingsVM @Inject constructor(
     }
 
     fun showClearAndHideDialog() {
-        viewModelScope.launch {
-            settingsActionChannel.send(
-                DialogActions.ShowQuestionDialog(
-                    title = UIText.StringResource(R.string.clear_and_hide),
-                    message = UIText.StringResource(R.string.clear_and_hide_long),
-                    CLEAR_AND_HIDE_DIALOG
-                )
-            )
-        }
+        showQuestionDialog(
+            title = UIText.StringResource(R.string.clear_and_hide),
+            message = UIText.StringResource(R.string.clear_and_hide_long),
+            CLEAR_AND_HIDE_DIALOG
+        )
     }
 
     fun showRunOnDuressPasswordDialog() {
-        viewModelScope.launch {
-            settingsActionChannel.send(
-                DialogActions.ShowQuestionDialog(
-                    title = UIText.StringResource(R.string.run_on_password),
-                    message = UIText.StringResource(R.string.run_on_password_long),
-                    RUN_ON_PASSWORD_DIALOG
-                )
-            )
-        }
+        showQuestionDialog(
+            title = UIText.StringResource(R.string.run_on_password),
+            message = UIText.StringResource(R.string.run_on_password_long),
+            RUN_ON_PASSWORD_DIALOG
+        )
     }
 
     fun setRunOnDuressPassword(status: Boolean) {
@@ -201,57 +247,259 @@ class SettingsVM @Inject constructor(
     }
 
     private fun onDhizukuAbsent() {
-        viewModelScope.launch {
-            settingsActionChannel.send(
-                DialogActions.ShowQuestionDialog(
-                    title = UIText.StringResource(R.string.install_dhizuku),
-                    message = UIText.StringResource(R.string.install_dhizuku_long),
-                    requestKey = INSTALL_DIZUKU_DIALOG
-                )
-            )
-        }
+        showQuestionDialog(
+            title = UIText.StringResource(R.string.install_dhizuku),
+            message = UIText.StringResource(R.string.install_dhizuku_long),
+            requestKey = INSTALL_DIZUKU_DIALOG
+        )
     }
 
-    fun disableSafeBoot() {
+    fun setSafeBoot(status: Boolean) {
         viewModelScope.launch {
             try {
-                setSafeBootUseCase()
-                settingsActionChannel.send(
-                    DialogActions.ShowInfoDialog(
-                        title = UIText.StringResource(R.string.safeboot_disabled),
-                        message = UIText.StringResource(R.string.safeboot_disabled_long)
-                    )
+                setSafeBootRestrictionUseCase(status)
+                val title = if (status) {
+                    R.string.safeboot_disabled
+                } else {
+                    R.string.safeboot_enabled
+                }
+
+                val message = if (status) {
+                    R.string.safeboot_disabled_long
+                } else {
+                    R.string.safeboot_enabled_long
+                }
+
+                showInfoDialogSuspend(
+                    title = UIText.StringResource(title),
+                    message = UIText.StringResource(message)
                 )
             } catch (e: SuperUserException) {
-                settingsActionChannel.send(
-                    DialogActions.ShowInfoDialog(
-                        title = UIText.StringResource(R.string.safeboot_not_disabled),
-                        message = e.messageForLogs,
-                    )
+                showInfoDialogSuspend(
+                    title = UIText.StringResource(R.string.safeboot_status_not_changed),
+                    message = e.messageForLogs,
                 )
             }
         }
     }
 
-    fun enableMultiuserUI() {
+    fun setUserSwitcher(status: Boolean) {
         viewModelScope.launch {
             try {
-                enableMultiuserUIUseCase()
-                settingsActionChannel.send(
-                    DialogActions.ShowQuestionDialog(
+                setUserSwitcherUseCase(status)
+                if (status) {
+                    showQuestionDialogSuspend(
+                        title = UIText.StringResource(R.string.user_switcher_enabled),
+                        message = UIText.StringResource(R.string.multiuser_ui_unlocked_long),
+                        requestKey = OPEN_MULTIUSER_SETTINGS_DIALOG
+                    )
+                } else {
+                    showInfoDialogSuspend(
+                        title = UIText.StringResource(R.string.user_switcher_disabled),
+                        message = UIText.StringResource(R.string.operation_successful)
+                    )
+                }
+            } catch (e: SuperUserException) {
+                showInfoDialogSuspend(
+                    title = UIText.StringResource(R.string.user_switcher_status_change_failed),
+                    message = e.messageForLogs,
+                )
+            }
+        }
+    }
+
+    fun setUserSwitchRestriction(status: Boolean) {
+        viewModelScope.launch {
+            try {
+                setUserSwitchRestrictionUseCase(status)
+                if (status) {
+                    showInfoDialogSuspend(
+                        title = UIText.StringResource(R.string.user_switch_disabled),
+                        message = UIText.StringResource(R.string.user_switch_disabled_long)
+                    )
+                } else {
+                    showQuestionDialogSuspend(
+                        title = UIText.StringResource(R.string.user_switch_enabled),
+                        message = UIText.StringResource(R.string.multiuser_ui_unlocked_long),
+                        requestKey = OPEN_MULTIUSER_SETTINGS_DIALOG
+                    )
+                }
+            } catch (e: SuperUserException) {
+                showInfoDialogSuspend(
+                    title = UIText.StringResource(R.string.user_switch_status_change_failed),
+                    message = e.messageForLogs,
+                )
+            }
+        }
+    }
+
+
+    fun setMultiuserUI(status: Boolean) {
+        viewModelScope.launch {
+            try {
+                setMultiuserUIUseCase(status)
+                if (status) {
+                    showQuestionDialogSuspend(
                         title = UIText.StringResource(R.string.multiuser_ui_unlocked),
                         message = UIText.StringResource(R.string.multiuser_ui_unlocked_long),
                         requestKey = OPEN_MULTIUSER_SETTINGS_DIALOG
                     )
-                )
-            } catch (e: SuperUserException) {
-                settingsActionChannel.send(
-                    DialogActions.ShowInfoDialog(
-                        title = UIText.StringResource(R.string.multiuser_ui_unlock_failed),
-                        message = e.messageForLogs,
+                } else {
+                    showInfoDialogSuspend(
+                        title = UIText.StringResource(R.string.multiuser_ui_locked),
+                        message = UIText.StringResource(R.string.operation_successful)
                     )
+                }
+            } catch (e: SuperUserException) {
+                showInfoDialogSuspend(
+                    title = UIText.StringResource(R.string.multiuser_ui_status_change_failed),
+                    message = e.messageForLogs,
                 )
+
             }
+        }
+    }
+
+    fun changeSafeBootRestrictionSettingsDialog() {
+        viewModelScope.launch {
+            val enabled = try {
+                getSafeBootRestrictionUseCase()
+            } catch (e: SuperUserException) {
+                showInfoDialogSuspend(
+                    UIText.StringResource(R.string.error_while_loading_data),
+                    e.messageForLogs
+                )
+                return@launch
+            }
+            val title = if (enabled) {
+                R.string.enable_safe_boot
+            } else {
+                R.string.disable_safe_boot
+            }
+            val message = if (enabled) {
+                R.string.enable_safe_boot_long
+            } else {
+                R.string.disable_safe_boot_long
+            }
+
+            val requestKey = if (enabled) {
+                DISABLE_SAFE_BOOT_RESTRICTION_DIALOG
+            } else {
+                ENABLE_SAFE_BOOT_RESTRICTION_DIALOG
+            }
+            showQuestionDialogSuspend(
+                title = UIText.StringResource(title),
+                message = UIText.StringResource(message),
+                requestKey = requestKey
+            )
+        }
+    }
+
+    fun changeMultiuserUISettingsDialog() {
+        viewModelScope.launch {
+            val enabled = try {
+                getMultiuserUIUseCase()
+            } catch (e: SuperUserException) {
+                showInfoDialogSuspend(
+                    UIText.StringResource(R.string.error_while_loading_data),
+                    e.messageForLogs
+                )
+                return@launch
+            }
+            val title = if (enabled) {
+                R.string.disable_multiuser_ui
+            } else {
+                R.string.enable_multiuser_ui
+
+            }
+            val message = if (enabled) {
+                R.string.disable_multiuser_ui_long
+            } else {
+                R.string.enable_multiuser_ui_long
+            }
+
+            val requestKey = if (enabled) {
+                DISABLE_MULTIUSER_UI_DIALOG
+            } else {
+                ENABLE_MULTIUSER_UI_DIALOG
+            }
+            showQuestionDialogSuspend(
+                title = UIText.StringResource(title),
+                message = UIText.StringResource(message),
+                requestKey = requestKey
+            )
+        }
+    }
+
+    fun changeUserSwitcherDialog() {
+        viewModelScope.launch {
+            val enabled = try {
+                getUserSwitcherStatusUseCase()
+            } catch (e: SuperUserException) {
+                showInfoDialogSuspend(
+                    UIText.StringResource(R.string.error_while_loading_data),
+                    e.messageForLogs
+                )
+                return@launch
+            }
+            val title = if (enabled) {
+                R.string.disable_user_switcher
+            } else {
+                R.string.enable_user_switcher
+
+            }
+            val message = if (enabled) {
+                R.string.disable_user_switcher_ui_long
+            } else {
+                R.string.enable_user_switcher_ui_long
+            }
+
+            val requestKey = if (enabled) {
+                DISABLE_USER_SWITCHER_DIALOG
+            } else {
+                ENABLE_USER_SWITCHER_DIALOG
+            }
+            showQuestionDialogSuspend(
+                title = UIText.StringResource(title),
+                message = UIText.StringResource(message),
+                requestKey = requestKey
+            )
+        }
+    }
+
+    fun changeSwitchUserDialog() {
+        viewModelScope.launch {
+            val enabled = try {
+                getUserSwitchRestrictionUseCase()
+            } catch (e: SuperUserException) {
+                showInfoDialogSuspend(
+                    UIText.StringResource(R.string.error_while_loading_data),
+                    e.messageForLogs
+                )
+                return@launch
+            }
+            val title = if (enabled) {
+                R.string.enable_switch_user
+            } else {
+                R.string.disable_switch_user
+
+            }
+            val message = if (enabled) {
+                R.string.enable_switch_user_long
+            } else {
+                R.string.disable_switch_user_long
+            }
+
+            val requestKey = if (enabled) {
+                DISABLE_SWITCH_USER_RESTRICTION_DIALOG
+            } else {
+                ENABLE_SWITCH_USER_RESTRICTION_DIALOG
+            }
+            showQuestionDialogSuspend(
+                title = UIText.StringResource(title),
+                message = UIText.StringResource(message),
+                requestKey = requestKey
+            )
         }
     }
 
@@ -331,75 +579,51 @@ class SettingsVM @Inject constructor(
     }
 
     fun showAccessibilityServiceDialog() {
-        viewModelScope.launch {
-            settingsActionChannel.send(
-                DialogActions.ShowQuestionDialog(
-                    title = UIText.StringResource(R.string.accessibility_service_title),
-                    message = UIText.StringResource(R.string.accessibility_service_long),
-                    MOVE_TO_ACCESSIBILITY_SERVICE
-                )
-            )
-        }
+        showQuestionDialog(
+            title = UIText.StringResource(R.string.accessibility_service_title),
+            message = UIText.StringResource(R.string.accessibility_service_long),
+            MOVE_TO_ACCESSIBILITY_SERVICE
+        )
     }
 
     fun showTRIMDialog() {
-        viewModelScope.launch {
-            settingsActionChannel.send(
-                DialogActions.ShowQuestionDialog(
-                    title = UIText.StringResource(R.string.run_trim),
-                    message = UIText.StringResource(R.string.trim_long),
-                    TRIM_DIALOG
-                )
-            )
-        }
+        showQuestionDialog(
+            title = UIText.StringResource(R.string.run_trim),
+            message = UIText.StringResource(R.string.trim_long),
+            TRIM_DIALOG
+        )
     }
 
     fun showWipeDialog() {
-        viewModelScope.launch {
-            settingsActionChannel.send(
-                DialogActions.ShowQuestionDialog(
-                    title = UIText.StringResource(R.string.wipe_data),
-                    message = UIText.StringResource(R.string.wipe_long),
-                    WIPE_DIALOG
-                )
-            )
-        }
+        showQuestionDialog(
+            title = UIText.StringResource(R.string.wipe_data),
+            message = UIText.StringResource(R.string.wipe_long),
+            WIPE_DIALOG
+        )
     }
 
     fun showSelfDestructionDialog() {
-        viewModelScope.launch {
-            settingsActionChannel.send(
-                DialogActions.ShowQuestionDialog(
-                    title = UIText.StringResource(R.string.remove_itself),
-                    message = UIText.StringResource(R.string.self_destruct_long),
-                    SELF_DESTRUCTION_DIALOG
-                )
-            )
-        }
+        showQuestionDialog(
+            title = UIText.StringResource(R.string.remove_itself),
+            message = UIText.StringResource(R.string.self_destruct_long),
+            SELF_DESTRUCTION_DIALOG
+        )
     }
 
     fun showRunOnUSBConnectionDialog() {
-        viewModelScope.launch {
-            settingsActionChannel.send(
-                DialogActions.ShowQuestionDialog(
-                    title = UIText.StringResource(R.string.run_on_connection),
-                    message = UIText.StringResource(R.string.run_on_usb_connection_long),
-                    USB_DIALOG
-                )
-            )
-        }
+        showQuestionDialog(
+            title = UIText.StringResource(R.string.run_on_connection),
+            message = UIText.StringResource(R.string.run_on_usb_connection_long),
+            USB_DIALOG
+        )
     }
 
     fun showBruteforceDialog() {
-        viewModelScope.launch {
-            settingsActionChannel.send(
-                DialogActions.ShowQuestionDialog(
-                    title = UIText.StringResource(R.string.bruteforce_defense),
-                    message = UIText.StringResource(R.string.bruteforce_defence_long),
-                    BRUTEFORCE_DIALOG
-                )
-            )
-        }
+        showQuestionDialog(
+            title = UIText.StringResource(R.string.bruteforce_defense),
+            message = UIText.StringResource(R.string.bruteforce_defence_long),
+            BRUTEFORCE_DIALOG
+        )
     }
 
     fun editMaxPasswordAttemptsDialog() {
@@ -417,14 +641,10 @@ class SettingsVM @Inject constructor(
     }
 
     fun showFaq() {
-        viewModelScope.launch {
-            settingsActionChannel.send(
-                DialogActions.ShowInfoDialog(
-                    title = UIText.StringResource(R.string.about_settings),
-                    message = UIText.StringResource(R.string.settings_faq)
-                )
-            )
-        }
+        showInfoDialog(
+            title = UIText.StringResource(R.string.about_settings),
+            message = UIText.StringResource(R.string.settings_faq)
+        )
     }
 
     fun disableAdmin() {
@@ -435,11 +655,9 @@ class SettingsVM @Inject constructor(
 
     fun showRootDisableDialog() {
         viewModelScope.launch {
-            settingsActionChannel.send(
-                DialogActions.ShowInfoDialog(
-                    message = UIText.StringResource(R.string.disable_root_long),
-                    title = UIText.StringResource(R.string.disable_root)
-                )
+            showInfoDialogSuspend(
+                message = UIText.StringResource(R.string.disable_root_long),
+                title = UIText.StringResource(R.string.disable_root)
             )
             setRootActiveUseCase(false)
         }
@@ -458,27 +676,19 @@ class SettingsVM @Inject constructor(
     }
 
     fun showLogdOnBootDialog() {
-        viewModelScope.launch {
-            settingsActionChannel.send(
-                DialogActions.ShowQuestionDialog(
-                    title = UIText.StringResource(R.string.logd_on_boot),
-                    message = UIText.StringResource(R.string.logd_on_boot_long),
-                    LOGD_ON_BOOT_DIALOG
-                )
-            )
-        }
+        showQuestionDialog(
+            title = UIText.StringResource(R.string.logd_on_boot),
+            message = UIText.StringResource(R.string.logd_on_boot_long),
+            LOGD_ON_BOOT_DIALOG
+        )
     }
 
     fun showLogdOnStartDialog() {
-        viewModelScope.launch {
-            settingsActionChannel.send(
-                DialogActions.ShowQuestionDialog(
-                    title = UIText.StringResource(R.string.logd_on_start),
-                    message = UIText.StringResource(R.string.logd_on_start_long),
-                    LOGD_ON_START_DIALOG
-                )
-            )
-        }
+        showQuestionDialog(
+            title = UIText.StringResource(R.string.logd_on_start),
+            message = UIText.StringResource(R.string.logd_on_start_long),
+            LOGD_ON_START_DIALOG
+        )
     }
 
 
@@ -498,6 +708,14 @@ class SettingsVM @Inject constructor(
         const val MAX_PASSWORD_ATTEMPTS_DIALOG = "max_password_attempts"
         const val OPEN_MULTIUSER_SETTINGS_DIALOG = "open_multiuser_settings_dialog"
         const val RUN_ON_PASSWORD_DIALOG = "run_on_password_dialog"
+        const val DISABLE_SAFE_BOOT_RESTRICTION_DIALOG = "disable_safe_boot_restriction_dialog"
+        const val ENABLE_SAFE_BOOT_RESTRICTION_DIALOG = "enable_safe_boot_restriction_dialog"
+        const val DISABLE_MULTIUSER_UI_DIALOG = "disable_multiuser_ui_dialog"
+        const val ENABLE_MULTIUSER_UI_DIALOG = "enable_multiuser_ui_dialog"
+        const val DISABLE_USER_SWITCHER_DIALOG = "disable_user_switcher_dialog"
+        const val ENABLE_USER_SWITCHER_DIALOG = "enable_user_switcher_dialog"
+        const val DISABLE_SWITCH_USER_RESTRICTION_DIALOG = "disable_switch_user_restriction_dialog"
+        const val ENABLE_SWITCH_USER_RESTRICTION_DIALOG = "enable_switch_user_restriction_dialog"
     }
 
 }

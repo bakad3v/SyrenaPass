@@ -1,10 +1,13 @@
 package com.android.aftools
 
+import android.os.UserManager
 import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.aftools.data.mappers.ProfilesMapper
 import com.android.aftools.presentation.utils.UIText
 import com.android.aftools.superuser.superuser.SuperUserException
+import com.anggrayudi.storage.extension.toBoolean
+import com.anggrayudi.storage.extension.toInt
 import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.joinAll
@@ -175,8 +178,58 @@ class RootTest {
     }
 
     @Test
-    fun getUserLimit() {
+    fun userLimitTest() {
         askSuperUserRights()
-        assertEquals(Regex("\\d").find(executeRootCommand("pm get-max-users").out[0])?.value?.toInt(),4)
+        executeRootCommand("setprop fw.max_users 5")
+        assertEquals(Regex("\\d").find(executeRootCommand("pm get-max-users").out[0])?.value?.toInt(),5)
+    }
+
+    @Test
+    fun multiuserUIStatusTest() {
+        askSuperUserRights()
+        executeRootCommand("setprop fw.show_multiuserui 1")
+        assert(executeRootCommand("getprop fw.show_multiuserui").out[0].toInt().toBoolean())
+        executeRootCommand("setprop fw.show_multiuserui 0")
+        assert(!executeRootCommand("getprop fw.show_multiuserui").out[0].toInt().toBoolean())
+        executeRootCommand("setprop fw.show_multiuserui 1")
+    }
+
+    @Test
+    fun safeBootStatusTest() {
+        askSuperUserRights()
+        executeRootCommand("pm set-user-restriction ${UserManager.DISALLOW_SAFE_BOOT} 1")
+        executeRootCommand("settings put global safe_boot_disallowed 1")
+        Log.w("device_policy",executeRootCommand("dumpsys device_policy | grep \"${UserManager.DISALLOW_SAFE_BOOT}\"").out[0])
+        assert(executeRootCommand("dumpsys device_policy | grep \"no_safe_boot\"").out[0].endsWith("no_safe_boot"))
+        executeRootCommand("pm set-user-restriction ${UserManager.DISALLOW_SAFE_BOOT} 0")
+        executeRootCommand("settings put global safe_boot_disallowed 0")
+        assert(!executeRootCommand("dumpsys device_policy | grep \"${UserManager.DISALLOW_SAFE_BOOT}\"").out[0].endsWith("no_safe_boot"))
+    }
+
+    @Test
+    fun userSwitcherStatusTest() {
+        askSuperUserRights()
+        executeRootCommand("settings put global user_switcher_enabled 1")
+        assert(executeRootCommand("settings get global user_switcher_enabled").out[0].toInt().toBoolean())
+        executeRootCommand("settings put global user_switcher_enabled 0")
+        assert(!executeRootCommand("settings get global user_switcher_enabled").out[0].toInt().toBoolean())
+        executeRootCommand("settings put global user_switcher_enabled 1")
+    }
+
+    private fun getSwitchUserRestriction():Boolean {
+        return try {
+            executeRootCommand("dumpsys user | grep \"${UserManager.DISALLOW_USER_SWITCH}\"").out[0].endsWith(UserManager.DISALLOW_USER_SWITCH)
+        } catch (e: SuperUserException) {
+            false
+        }
+    }
+
+    @Test
+    fun switchUserRestrictionTest() {
+        askSuperUserRights()
+        executeRootCommand("pm set-user-restriction ${UserManager.DISALLOW_USER_SWITCH} 1")
+        assert(getSwitchUserRestriction())
+        executeRootCommand("pm set-user-restriction ${UserManager.DISALLOW_USER_SWITCH} 0")
+        assert(!getSwitchUserRestriction())
     }
 }

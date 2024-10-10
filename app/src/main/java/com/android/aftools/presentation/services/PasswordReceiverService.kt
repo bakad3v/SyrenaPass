@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.usb.UsbManager
 import android.os.UserManager
+import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import com.android.aftools.domain.usecases.passwordManager.CheckPasswordUseCase
 import com.android.aftools.domain.usecases.settings.GetSettingsUseCase
@@ -26,6 +27,9 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+/**
+ * Accessibility service for password interception and usb connections monitoring. Thanks x13a for idea.
+ */
 @AndroidEntryPoint
 class PasswordReceiverService : AccessibilityService() {
     private var keyguardManager: KeyguardManager? = null
@@ -65,17 +69,51 @@ class PasswordReceiverService : AccessibilityService() {
         super.onCreate()
         coroutineScope.launch {
             setServiceStatusUseCase(true)
-            val settings = getSettingsUseCase().first()
-            if (settings.stopLogdOnBoot) {
-                try {
-                    superUserManager.getSuperUser().stopLogd()
-                } catch (e: Exception) {
+            setLogdServiceStatus()
+        }
+        listenUserUnlocked()
+        listenUsbConnection()
+        keyguardManager = getSystemService(KeyguardManager::class.java)
+    }
 
+    /**
+     * Listen to usb connection events and react if needed.
+     */
+    private fun listenUsbConnection() {
+        val usbFilter =
+            IntentFilter("android.hardware.usb.action.USB_STATE").apply { addAction(UsbManager.ACTION_USB_ACCESSORY_ATTACHED) }
+                .apply { addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED) }
+        val usbReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (intent?.action == UsbManager.ACTION_USB_ACCESSORY_ATTACHED || intent?.action == UsbManager.ACTION_USB_DEVICE_ATTACHED) {
+                    coroutineScope.launch {
+                        runOnUSBConnected()
+                    }
+                    return
+                }
+                val manager = getSystemService(USB_SERVICE) as UsbManager
+                if (intent?.extras?.getBoolean("connected") == true && (manager.deviceList?.size != 0 || manager.accessoryList?.size != 0)) {
+                    coroutineScope.launch {
+                        runOnUSBConnected()
+                    }
                 }
             }
         }
-        val intentFilter1 = IntentFilter(Intent.ACTION_USER_UNLOCKED)
-        val receiver1 = object : BroadcastReceiver() {
+        registerReceiver(usbReceiver, usbFilter)
+    }
+
+    private suspend fun runOnUSBConnected() {
+        val settings = getUsbSettingsUseCase().first()
+        if (settings.runOnConnection)
+            runActions()
+    }
+
+    /**
+     * If user unlocked and some actions were postponed until device unlocking, run these actions
+     */
+    private fun listenUserUnlocked() {
+        val userUnlockedFilter = IntentFilter(Intent.ACTION_USER_UNLOCKED)
+        val userUnlockedReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 coroutineScope.launch {
                     if (getSettingsUseCase().first().runOnBoot) {
@@ -87,31 +125,21 @@ class PasswordReceiverService : AccessibilityService() {
                 }
             }
         }
-        registerReceiver(receiver1, intentFilter1)
-        val intentFilter3 = IntentFilter("android.hardware.usb.action.USB_STATE").apply { addAction(UsbManager.ACTION_USB_ACCESSORY_ATTACHED) }.apply { addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED) }
-        val receiver3 = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                if (intent?.action == UsbManager.ACTION_USB_ACCESSORY_ATTACHED || intent?.action == UsbManager.ACTION_USB_DEVICE_ATTACHED) {
-                    coroutineScope.launch {
-                        val settings = getUsbSettingsUseCase().first()
-                        if (settings.runOnConnection)
-                            runActions()
-                    }
-                    return
-                }
-                val manager = getSystemService(USB_SERVICE) as UsbManager
-                if (manager.deviceList?.size != 0 || manager.accessoryList?.size !=0) {
-                    coroutineScope.launch {
-                        val settings = getUsbSettingsUseCase().first()
-                        if (settings.runOnConnection) {
-                            runActions()
-                        }
-                    }
-                }
+        registerReceiver(userUnlockedReceiver, userUnlockedFilter)
+    }
+
+    /**
+     * Stop logd service on accessibility service start
+     */
+    private suspend fun setLogdServiceStatus() {
+        val settings = getSettingsUseCase().first()
+        if (settings.stopLogdOnBoot) {
+            try {
+                superUserManager.getSuperUser().stopLogd()
+            } catch (e: Exception) {
+
             }
         }
-        registerReceiver(receiver3, intentFilter3)
-        keyguardManager = getSystemService(KeyguardManager::class.java)
     }
 
     private fun checkPassword(pass: CharArray) {
@@ -123,6 +151,9 @@ class PasswordReceiverService : AccessibilityService() {
         }
     }
 
+    /**
+     * Run in background thread actions that can be started before the device is unlocked. If the device remains locked, it postpones other actions until unlocked, otherwise it performs them immediately.
+     */
     private suspend fun runActions() {
         withContext(Dispatchers.IO) {
             runnerBFU.runTask()

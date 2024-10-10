@@ -5,6 +5,7 @@ import androidx.documentfile.provider.DocumentFile
 import com.android.aftools.R
 import com.android.aftools.domain.entities.FileDomain
 import com.android.aftools.domain.entities.FileType
+import com.android.aftools.domain.entities.Settings
 import com.android.aftools.domain.usecases.filesDatabase.DeleteMyFileUseCase
 import com.android.aftools.domain.usecases.filesDatabase.GetFilesDbUseCase
 import com.android.aftools.domain.usecases.logs.GetLogsDataUseCase
@@ -30,6 +31,9 @@ import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Class for running tasks requiring phone's unlock safely
+ */
 @Singleton
 class AFUActivitiesRunner @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -60,20 +64,21 @@ class AFUActivitiesRunner @Inject constructor(
 
     }
 
+
     private suspend fun runAFUActivity() {
         val settings = getSettingsUseCase().first()
         if (!settings.deleteFiles && !settings.removeItself && !settings.clearAndHideItself) {
             return
-        }
+        } //getting settings
         try {
             logsAllowed = getLogsDataUseCase().first().logsEnabled
-            writeToLogs(R.string.deletion_started)
+            writeToLogs(R.string.deletion_started) //getting log status, trying to write to logs
         } catch (e: Exception) {
-
+            return
         }
         try {
             val files = getFilesDbUseCase().first()
-            removeAll(files)
+            removeAll(files) //getting files, removing files
             writeToLogs(R.string.deletion_completed)
         } catch (e: Exception) {
             writeToLogs(R.string.getting_data_error, e.stackTraceToString())
@@ -82,42 +87,62 @@ class AFUActivitiesRunner @Inject constructor(
         val permissions = getPermissionsUseCase().first()
         if (!permissions.isRoot && !permissions.isOwner) {
             return
-        }
+        } //if permissions absent return
         if (permissions.isRoot) {
-            if (settings.trim) {
-                try {
-                    writeToLogs(R.string.running_trim)
-                    superUserManager.getSuperUser().runTrim()
-                } catch (e:SuperUserException) {
-                    writeToLogs(e.messageForLogs)
-                } catch (e:Exception) {
-                    writeToLogs(R.string.trim_failed,e.stackTraceToString())
-                }
-                writeToLogs(R.string.trim_runned)
-            }
+            runTrim(settings)
         }
         if (settings.removeItself) {
-            try {
-                writeToLogs(R.string.uninstalling_itself)
-                superUserManager.getSuperUser().uninstallApp(context.packageName)
-            } catch (e: SuperUserException) {
-                writeToLogs(e.messageForLogs)
-            }
-            catch (e: Exception) {
-                writeToLogs(R.string.uninstallation_failed,e.stackTraceToString())
-            }
+            removeItself()
         }
         if (settings.clearAndHideItself) {
+            clearAndGHideItself()
+        }
+    }
+
+    /**
+     * Function to clear app data and hide the app
+     */
+    private suspend fun clearAndGHideItself() {
+        try {
+            writeToLogs(R.string.clearing_and_hiding)
+            val superUser = superUserManager.getSuperUser()
+            superUser.hideApp(context.packageName)
+            superUser.clearAppData(context.packageName)
+        } catch (e: SuperUserException) {
+            writeToLogs(e.messageForLogs)
+        } catch (e: Exception) {
+            writeToLogs(R.string.clear_and_hide_failed, e.stackTraceToString())
+        }
+    }
+
+    /**
+     * Function to remove an app
+     */
+    private suspend fun removeItself() {
+        try {
+            writeToLogs(R.string.uninstalling_itself)
+            superUserManager.getSuperUser().uninstallApp(context.packageName)
+        } catch (e: SuperUserException) {
+            writeToLogs(e.messageForLogs)
+        } catch (e: Exception) {
+            writeToLogs(R.string.uninstallation_failed, e.stackTraceToString())
+        }
+    }
+
+    /**
+     * Function for running TRIM
+     */
+    private suspend fun runTrim(settings: Settings) {
+        if (settings.trim) {
             try {
-                writeToLogs(R.string.clearing_and_hiding)
-                val superUser = superUserManager.getSuperUser()
-                superUser.hideApp(context.packageName)
-                superUser.clearAppData(context.packageName)
+                writeToLogs(R.string.running_trim)
+                superUserManager.getSuperUser().runTrim()
             } catch (e: SuperUserException) {
                 writeToLogs(e.messageForLogs)
             } catch (e: Exception) {
-                writeToLogs(R.string.clear_and_hide_failed,e.stackTraceToString())
+                writeToLogs(R.string.trim_failed, e.stackTraceToString())
             }
+            writeToLogs(R.string.trim_runned)
         }
     }
 

@@ -24,9 +24,7 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import javax.inject.Inject
 
-/**
- * Repository for usual files
- */
+
 class FilesRepositoryImpl @Inject constructor(
   @ApplicationContext private val context: Context,
   private val mapper: FileMapper,
@@ -40,36 +38,26 @@ class FilesRepositoryImpl @Inject constructor(
   private val Context.filesDataStore by dataStore(DATASTORE_NAME,filesSerializer)
 
 
-  /**
-   * Function for getting sorted flow of files
-   */
   @OptIn(ExperimentalCoroutinesApi::class)
   override fun getFilesDb() : Flow<List<FileDomain>> = sortOrderFlow.flatMapLatest {
     context.filesDataStore.data.map { files -> mapper.mapDatastoreListToDtList(files.getSorted(it)) }
   }
 
 
-  /**
-   * Function to clear database
-   */
   override suspend fun clearDb() {
     context.filesDataStore.updateData {
       it.clear()
     }
   }
 
-  /**
-   * Function to change priority of file.
-   */
+
   override suspend fun changeFilePriority(priority: Int, uri: Uri) {
     context.filesDataStore.updateData {
       it.changePriority(uri.toString(),priority)
     }
   }
 
-  /**
-   * Function to change files sort order
-   */
+
   override suspend fun changeSortOrder(sortOrder: FilesSortOrder) {
     sortOrderFlow.emit(sortOrder)
   }
@@ -105,9 +93,7 @@ class FilesRepositoryImpl @Inject constructor(
     return "${number.toInt()} ${names[i]}"
   }
 
-  /**
-   * Function for file inserting. Gets size of file and converts it to human format, sets default priority to 0, determines the file type.
-   */
+
   override suspend fun insertMyFile(uri: Uri, isDirectory: Boolean) {
     val df = if(isDirectory) {
       DocumentFile.fromTreeUri(context,uri)
@@ -133,9 +119,7 @@ class FilesRepositoryImpl @Inject constructor(
     }
   }
 
-  /**
-   * Function to delete file
-   */
+
   override suspend fun deleteMyFile(uri: Uri) {
     context.filesDataStore.updateData {
       it.delete(uri.toString())

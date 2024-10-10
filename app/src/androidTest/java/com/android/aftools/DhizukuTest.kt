@@ -2,21 +2,22 @@ package com.android.aftools
 
 import android.annotation.SuppressLint
 import android.app.admin.DevicePolicyManager
+import android.app.admin.IDevicePolicyManager
 import android.content.Context
 import android.content.IntentSender
+import android.content.pm.IPackageInstaller
+import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Build.VERSION
 import android.os.Parcel
 import android.os.UserHandle
+import android.os.UserManager
 import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import android.app.admin.IDevicePolicyManager
-import android.content.pm.IPackageInstaller
-import android.content.pm.PackageInstaller
-import android.os.Build
-import android.os.UserManager
 import com.android.aftools.data.mappers.ProfilesMapper
+import com.anggrayudi.storage.extension.toInt
 import com.rosan.dhizuku.api.Dhizuku
 import com.rosan.dhizuku.api.Dhizuku.binderWrapper
 import com.rosan.dhizuku.api.DhizukuBinderWrapper
@@ -196,5 +197,57 @@ class DhizukuTest {
         })
     }
 
+    fun DevicePolicyManager.setSafeBootStatus(status: Boolean) {
+        addUserRestriction(deviceOwner,UserManager.DISALLOW_SAFE_BOOT)
+        setGlobalSetting(deviceOwner, "safe_boot_disallowed",status.toInt().toString())
+    }
+
+    fun DevicePolicyManager.getSafeBootStatus(): Boolean {
+        return getUserRestrictions(deviceOwner).getBoolean(UserManager.DISALLOW_SAFE_BOOT)
+    }
+
+    fun DevicePolicyManager.setSwitchUserRestriction(status: Boolean) {
+        addUserRestriction(deviceOwner, UserManager.DISALLOW_USER_SWITCH)
+    }
+
+    fun DevicePolicyManager.getSwitchUserRestriction(): Boolean {
+        return getUserRestrictions(deviceOwner).getBoolean(UserManager.DISALLOW_USER_SWITCH)
+    }
+
+    @Test
+    fun switchUserRestrictionTest() {
+        Dhizuku.init(context)
+        Dhizuku.requestPermission(object : DhizukuRequestPermissionListener() {
+            override fun onRequestPermission(grantResult: Int) {
+                if (grantResult == PackageManager.PERMISSION_GRANTED) {
+                    val dpm = getDhizukuDPM()
+                    dpm.setSafeBootStatus(true)
+                    assert(dpm.getSafeBootStatus())
+                    dpm.setSafeBootStatus(false)
+                    assert(!dpm.getSafeBootStatus())
+                } else {
+                    assert(false)
+                }
+            }
+        })
+    }
+
+    @Test
+    fun safeBootStatusTest() {
+        Dhizuku.init(context)
+        Dhizuku.requestPermission(object : DhizukuRequestPermissionListener() {
+            override fun onRequestPermission(grantResult: Int) {
+                if (grantResult == PackageManager.PERMISSION_GRANTED) {
+                    val dpm = getDhizukuDPM()
+                    dpm.setSwitchUserRestriction(true)
+                    assert(dpm.getSwitchUserRestriction())
+                    dpm.setSwitchUserRestriction(false)
+                    assert(!dpm.getSwitchUserRestriction())
+                } else {
+                    assert(false)
+                }
+            }
+        })
+    }
 
 }

@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 /**
- * Repository for changing app settings and enabling/disabling deletion
+ * Repository for changing app settings
  */
 class SettingsRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -126,17 +126,36 @@ class SettingsRepositoryImpl @Inject constructor(
     }
 
 
-    override suspend fun enableMultiuserUI() {
-        superUserManager.getSuperUser().enableMultiuserUI()
+    override suspend fun setMultiuserUIStatus(status: Boolean) {
+        superUserManager.getSuperUser().setMultiuserUI(status)
     }
 
+    override suspend fun getMultiuserUIStatus(): Boolean =
+        superUserManager.getSuperUser().getMultiuserUIStatus()
+
+    override suspend fun setUserSwitcherStatus (status: Boolean) {
+        superUserManager.getSuperUser().setUserSwitcherStatus(status)
+    }
+
+    override suspend fun getUserSwitcherStatus(): Boolean =
+        superUserManager.getSuperUser().getUserSwitcherStatus()
+
+    override suspend fun getSwitchUserRestriction(): Boolean =
+        superUserManager.getSuperUser().getSwitchUserRestriction()
+
+    override suspend fun setSwitchUserRestriction(status: Boolean) {
+        superUserManager.getSuperUser().setSwitchUserRestriction(status)
+    }
 
     override suspend fun getUserLimit(): Int? =
         superUserManager.getSuperUser().getUserLimit()
 
-    override suspend fun disableSafeBoot() {
-        superUserManager.getSuperUser().disableSafeBoot()
+    override suspend fun setSafeBootStatus(status: Boolean) {
+        superUserManager.getSuperUser().setSafeBootStatus(status)
     }
+
+    override suspend fun getSafeBootStatus(): Boolean =
+        superUserManager.getSuperUser().getSafeBootStatus()
 
     override suspend fun setRunOnDuressPassword(status: Boolean) {
         context.settingsDatastore.updateData {

@@ -7,8 +7,8 @@ import com.android.aftools.domain.usecases.apps.RemoveApplicationUseCase
 import com.android.aftools.domain.usecases.logs.GetLogsDataUseCase
 import com.android.aftools.domain.usecases.logs.WriteToLogsUseCase
 import com.android.aftools.domain.usecases.permissions.GetPermissionsUseCase
-import com.android.aftools.domain.usecases.profiles.DeleteProfilesUseCase
 import com.android.aftools.domain.usecases.profiles.GetProfilesToDeleteUseCase
+import com.android.aftools.domain.usecases.profiles.SetProfileDeletionStatusUseCase
 import com.android.aftools.domain.usecases.settings.GetSettingsUseCase
 import com.android.aftools.presentation.utils.UIText
 import com.android.aftools.superuser.superuser.SuperUser
@@ -21,6 +21,9 @@ import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Class for running tasks that can be completed before the device is unlocked
+ */
 @Singleton
 class BFUActivitiesRunner @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -28,9 +31,9 @@ class BFUActivitiesRunner @Inject constructor(
     private val getProfilesToDelete: GetProfilesToDeleteUseCase,
     private val getManagedAppsUseCase: GetManagedAppsUseCase,
     private val removeApplicationUseCase: RemoveApplicationUseCase,
-    private val deleteProfilesUseCase: DeleteProfilesUseCase,
     private val writeToLogsUseCase: WriteToLogsUseCase,
     private val superUserManager: SuperUserManager,
+    private val setProfileDeletionStatusUseCase: SetProfileDeletionStatusUseCase,
     private val getPermissionsUseCase: GetPermissionsUseCase,
     private val getLogsDataUseCase: GetLogsDataUseCase
 ) {
@@ -52,36 +55,48 @@ class BFUActivitiesRunner @Inject constructor(
         }
     }
 
-    private suspend fun writeToLogsResource(rId: Int, vararg obj: String) {
+    private suspend fun writeToLogs(rId: Int, vararg obj: String) {
         if (logsAllowed == true)
             writeToLogsUseCase(context.getString(rId, *obj))
     }
 
-    private suspend fun writeToLogsUIText(text: UIText.StringResource) {
+    private suspend fun writeToLogs(text: UIText.StringResource) {
         if (logsAllowed == true)
             writeToLogsUseCase(text.asString(context))
     }
 
+    /**
+     * Function to run superuser actions, check results and write progress to logs.
+     * @param startText Text to write to logs on start of the action
+     * @param successText Text to write to logs on success
+     * @param failureText Text to write to logs on error
+     * @param startTextParams Parameters of startText
+     * @param action Action to run
+     * @return true in case of success, false in case of failure
+     */
     private suspend fun runSuperuserAction(startText: Int, successText: Int, failureText: Int, vararg startTextParams: String, action: suspend () -> Unit): Boolean {
         try {
-            writeToLogsResource(startText, *startTextParams)
+            writeToLogs(startText, *startTextParams)
             action()
-            writeToLogsResource(successText)
+            writeToLogs(successText)
             return true
         } catch (e: SuperUserException) {
-            writeToLogsUIText(e.messageForLogs)
+            writeToLogs(e.messageForLogs)
         } catch (e: Exception) {
-            writeToLogsResource(failureText, e.stackTraceToString())
+            writeToLogs(failureText, e.stackTraceToString())
         }
         return false
     }
 
+    /**
+     * Function for removing all profiles marked for deletion and deleting them from list of profiles
+     */
     private suspend fun removeProfiles(superUser: SuperUser) {
-        writeToLogsResource(R.string.getting_profiles)
+        writeToLogs(R.string.getting_profiles)
         val profiles = try {
             getProfilesToDelete().first()
         } catch (e: Exception) {
-            writeToLogsResource(R.string.getting_profiles_failed)
+            writeToLogs(R.string.getting_profiles_failed)
             return
         }
         profiles.forEach {
@@ -90,10 +105,13 @@ class BFUActivitiesRunner @Inject constructor(
                 }
         }
         profiles.forEach {
-            deleteProfilesUseCase(it)
+            setProfileDeletionStatusUseCase(it,false)
         }
     }
 
+    /**
+     * Function for removing all apps marked for deletion and deleting them from list of apps
+     */
     private suspend fun deleteApps(
         superUser: SuperUser
     ) {
@@ -120,14 +138,15 @@ class BFUActivitiesRunner @Inject constructor(
         }
     }
 
+
     private suspend fun runBFUActivity() {
         try {
             logsAllowed = getLogsDataUseCase().first().logsEnabled
-            writeToLogsResource(R.string.actions_started)
+            writeToLogs(R.string.actions_started)
         } catch (e: Exception) {
             return
         }
-        writeToLogsResource(R.string.loading_data)
+        writeToLogs(R.string.loading_data)
         val (permissions, settings, superUser) = try {
             Triple(
                 getPermissionsUseCase().first(),
@@ -135,10 +154,10 @@ class BFUActivitiesRunner @Inject constructor(
                 superUserManager.getSuperUser()
             )
         } catch (e: Exception) {
-            writeToLogsResource(R.string.getting_data_error, e.stackTraceToString())
+            writeToLogs(R.string.getting_data_error, e.stackTraceToString())
             return
         }
-        writeToLogsResource(R.string.got_data)
+        writeToLogs(R.string.got_data)
         if (!permissions.isRoot && !permissions.isOwner && !permissions.isAdmin)
             return
         if (settings.wipe) {
@@ -167,7 +186,7 @@ class BFUActivitiesRunner @Inject constructor(
         }
         if (settings.deleteFiles) {
             return
-        }
+        } //if there are some files marked for deletion, the following actions should be postponed until the removal of files is completed
         if (permissions.isRoot) {
             if (settings.trim) {
                 runSuperuserAction(R.string.running_trim, R.string.trim_runned, R.string.trim_failed) {

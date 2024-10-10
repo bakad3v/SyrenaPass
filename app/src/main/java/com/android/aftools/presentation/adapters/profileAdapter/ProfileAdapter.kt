@@ -13,7 +13,7 @@ import com.google.android.material.color.MaterialColors
 import javax.inject.Inject
 
 /**
- * Recycler view adapter for usual files
+ * Recycler view adapter for profiles
  */
 class ProfileAdapter @Inject constructor(
   diffCallback: MyProfileAdapterDiffCallback,
@@ -31,7 +31,7 @@ class ProfileAdapter @Inject constructor(
   }
 
   /**
-   * Function for selecting image to display depending on the type of file
+   * Function for selecting image to display depending on the status of profile
    */
   private fun MaterialButton.setStyle(delete: Boolean) {
       if (delete) {

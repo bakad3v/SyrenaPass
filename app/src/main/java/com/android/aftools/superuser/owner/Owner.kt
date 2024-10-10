@@ -21,6 +21,7 @@ import com.android.aftools.presentation.receivers.DeviceAdminReceiver
 import com.android.aftools.presentation.utils.UIText
 import com.android.aftools.superuser.superuser.SuperUser
 import com.android.aftools.superuser.superuser.SuperUserException
+import com.anggrayudi.storage.extension.toInt
 import com.rosan.dhizuku.api.Dhizuku
 import com.rosan.dhizuku.api.Dhizuku.binderWrapper
 import com.rosan.dhizuku.api.DhizukuBinderWrapper
@@ -45,6 +46,9 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
         initialized = true
     }
 
+    /**
+     * Function for getting Dhizuku DPM. Thanks BinTianqi for this code.
+     */
     @SuppressLint("PrivateApi", "SoonBlockedPrivateApi")
     private fun getDhizukuDPM(): DevicePolicyManager {
         if (!initialized) {
@@ -63,6 +67,9 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
         return manager
     }
 
+    /**
+     * Function for getting Dhizuku package installer. Thanks BinTianqi for this code.
+     */
     @SuppressLint("SoonBlockedPrivateApi")
     private fun getDhizukuPackageInstaller(): PackageInstaller {
         if (!initialized) {
@@ -83,7 +90,11 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
 
     private fun checkAdminApp(packageName: String) {
         if (packageName == context.packageName && appDPM.isAdminActive(deviceAdmin)) {
-            appDPM.removeActiveAdmin(deviceAdmin)
+            try {
+                appDPM.removeActiveAdmin(deviceAdmin)
+            } catch (e: Exception) {
+
+            }
         }
     }
 
@@ -112,7 +123,7 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
                     }
                 }
             })
-        } catch (e: AssertionError) {
+        } catch (e: Exception) {
             onAbsent()
         }
     }
@@ -144,7 +155,7 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
                 if (VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     dpm.getSecondaryUsers(deviceOwner) ?: listOf()
                 } else {
-                    throw SuperUserException(ANDROID_VERSION_INCORRECT.format("28"),UIText.StringResource(R.string.wrong_android_version,"28"))
+                    throw SuperUserException(ANDROID_VERSION_INCORRECT.format(Build.VERSION_CODES.P),UIText.StringResource(R.string.wrong_android_version,Build.VERSION_CODES.P.toString()))
                 }
             return userHandles.map { profilesMapper.mapUserHandleToProfile(it) }
         } catch (e: Exception) {
@@ -174,6 +185,7 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
 
     override suspend fun hideApp(packageName: String) {
         try {
+            checkAdminApp(packageName)
             dpm.setApplicationHidden(deviceOwner, packageName, true)
         } catch (e: Exception) {
             handleException(e)
@@ -182,6 +194,7 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
 
     override suspend fun clearAppData(packageName: String) {
         try {
+            checkAdminApp(packageName)
             if (VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 dpm.clearApplicationUserData(
                     deviceOwner,
@@ -189,11 +202,34 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
                     Executors.newSingleThreadExecutor()
                 ) { packae, success -> }
             } else {
-                throw SuperUserException(ANDROID_VERSION_INCORRECT.format("28"),UIText.StringResource(R.string.wrong_android_version,"28"))
+                throw SuperUserException(ANDROID_VERSION_INCORRECT.format(Build.VERSION_CODES.P),UIText.StringResource(R.string.wrong_android_version,Build.VERSION_CODES.P.toString()))
             }
         } catch (e: Exception) {
             handleException(e)
         }
+    }
+
+    override suspend fun setSafeBootStatus(status: Boolean) {
+        dpm.addUserRestriction(deviceOwner,UserManager.DISALLOW_SAFE_BOOT)
+        dpm.setGlobalSetting(deviceOwner, "safe_boot_disallowed",status.toInt().toString())
+    }
+
+    override suspend fun getSafeBootStatus(): Boolean =
+        dpm.getUserRestrictions(deviceOwner).getBoolean(UserManager.DISALLOW_SAFE_BOOT)
+
+    override suspend fun setSwitchUserRestriction(status: Boolean) {
+        if (VERSION.SDK_INT < Build.VERSION_CODES.P)
+            throw SuperUserException(ANDROID_VERSION_INCORRECT.format(Build.VERSION_CODES.P),UIText.StringResource(R.string.wrong_android_version,Build.VERSION_CODES.P.toString()))
+        if (status)
+            dpm.addUserRestriction(deviceOwner,UserManager.DISALLOW_USER_SWITCH)
+        else
+            dpm.clearUserRestriction(deviceOwner, UserManager.DISALLOW_USER_SWITCH)
+    }
+
+    override suspend fun getSwitchUserRestriction(): Boolean {
+        if (VERSION.SDK_INT < Build.VERSION_CODES.P)
+            throw SuperUserException(ANDROID_VERSION_INCORRECT.format(Build.VERSION_CODES.P),UIText.StringResource(R.string.wrong_android_version,Build.VERSION_CODES.P.toString()))
+        return dpm.getUserRestrictions(deviceOwner).getBoolean(UserManager.DISALLOW_USER_SWITCH)
     }
 
     override suspend fun runTrim() {
@@ -208,7 +244,7 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
         throw SuperUserException(NO_ROOT_RIGHTS,UIText.StringResource(R.string.no_root_rights))
     }
 
-    override suspend fun enableMultiuserUI() {
+    override suspend fun setMultiuserUI(status: Boolean) {
         throw SuperUserException(NO_ROOT_RIGHTS,UIText.StringResource(R.string.no_root_rights))
     }
 
@@ -220,9 +256,20 @@ class Owner @Inject constructor(@ApplicationContext private val context: Context
         throw SuperUserException(NO_ROOT_RIGHTS,UIText.StringResource(R.string.no_root_rights))
     }
 
-    override suspend fun disableSafeBoot() {
-        dpm.addUserRestriction(deviceOwner,UserManager.DISALLOW_SAFE_BOOT)
+    override suspend fun getMultiuserUIStatus(): Boolean {
+        throw SuperUserException(NO_ROOT_RIGHTS,UIText.StringResource(R.string.no_root_rights))
     }
+
+    override suspend fun setUserSwitcherStatus(status: Boolean) {
+        throw SuperUserException(NO_ROOT_RIGHTS,UIText.StringResource(R.string.no_root_rights))
+       // dpm.setGlobalSetting(deviceOwner, "user_switcher_enabled",status.toInt().toString())
+    }
+
+    override suspend fun getUserSwitcherStatus(): Boolean {
+        throw SuperUserException(NO_ROOT_RIGHTS,UIText.StringResource(R.string.no_root_rights))
+    }
+
+
 
     companion object {
         private const val NO_OWNER_RIGHTS = "App doesn't have owner rights."

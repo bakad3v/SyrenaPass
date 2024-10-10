@@ -22,6 +22,8 @@ import okio.Path.Companion.toPath
 import java.io.File
 
 /**
+ * **This is a modification of android Datastore with some fixes to make it direct boot aware.**
+ *
  * Creates a property delegate for a single process DataStore. This should only be called once
  * in a file (at the top level), and all usages of the DataStore should use a reference the same
  * Instance. The receiver type for the property delegate must be an instance of [Context].
@@ -83,7 +85,7 @@ internal class DataStoreSingletonDelegateFixed<T> internal constructor(
     private var INSTANCE: DataStore<T>? = null
 
     /**
-     * Gets the instance of the DataStore.
+     * Gets the instance of the directboot aware DataStore.
      *
      * @param thisRef must be an instance of [Context]
      * @param property not used

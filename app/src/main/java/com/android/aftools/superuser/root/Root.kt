@@ -3,6 +3,7 @@ package com.android.aftools.superuser.root
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
+import android.os.Build
 import android.os.UserManager
 import com.android.aftools.R
 import com.android.aftools.data.mappers.ProfilesMapper
@@ -12,9 +13,10 @@ import com.android.aftools.presentation.receivers.DeviceAdminReceiver
 import com.android.aftools.presentation.utils.UIText
 import com.android.aftools.superuser.superuser.SuperUser
 import com.android.aftools.superuser.superuser.SuperUserException
+import com.anggrayudi.storage.extension.toBoolean
+import com.anggrayudi.storage.extension.toInt
 import com.topjohnwu.superuser.Shell
 import dagger.hilt.android.qualifiers.ApplicationContext
-
 import javax.inject.Inject
 
 class Root @Inject constructor(@ApplicationContext private val context: Context, private val profilesMapper: ProfilesMapper, private val setRootActiveUseCase: SetRootActiveUseCase, private val dpm: DevicePolicyManager, private val userManager: UserManager) : SuperUser {
@@ -63,8 +65,8 @@ class Root @Inject constructor(@ApplicationContext private val context: Context,
         executeRootCommand("stop logd")
     }
 
-    override suspend fun enableMultiuserUI() {
-        executeRootCommand("setprop fw.show_multiuserui 1")
+    override suspend fun setMultiuserUI(status: Boolean) {
+        executeRootCommand("setprop fw.show_multiuserui ${status.toInt()}")
     }
 
     override suspend fun setUsersLimit(limit: Int) {
@@ -75,9 +77,46 @@ class Root @Inject constructor(@ApplicationContext private val context: Context,
         return Regex("\\d").find(executeRootCommand("pm get-max-users").out[0])?.value?.toInt()
     }
 
-    override suspend fun disableSafeBoot() {
-        executeRootCommand("pm set-user-restriction ${UserManager.DISALLOW_SAFE_BOOT} 1")
+    override suspend fun setSafeBootStatus(status: Boolean) {
+        executeRootCommand("pm set-user-restriction ${UserManager.DISALLOW_SAFE_BOOT} ${status.toInt()}")
+        executeRootCommand("settings put global safe_boot_disallowed ${status.toInt()}")
+
     }
+
+    override suspend fun setUserSwitcherStatus(status: Boolean) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)
+            throw SuperUserException(ANDROID_VERSION_INCORRECT.format(Build.VERSION_CODES.P),UIText.StringResource(R.string.wrong_android_version,Build.VERSION_CODES.P.toString()))
+        executeRootCommand("settings put global user_switcher_enabled ${status.toInt()}")
+    }
+
+    override suspend fun getUserSwitcherStatus(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)
+            throw SuperUserException(ANDROID_VERSION_INCORRECT.format(Build.VERSION_CODES.P),UIText.StringResource(R.string.wrong_android_version,Build.VERSION_CODES.P.toString()))
+        return executeRootCommand("settings get global user_switcher_enabled").out[0].toInt().toBoolean()
+    }
+    override suspend fun setSwitchUserRestriction(status: Boolean) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P)
+            throw SuperUserException(ANDROID_VERSION_INCORRECT.format(Build.VERSION_CODES.P),UIText.StringResource(R.string.wrong_android_version,Build.VERSION_CODES.P.toString()))
+        executeRootCommand("pm set-user-restriction ${UserManager.DISALLOW_USER_SWITCH} ${status.toInt()}")
+    }
+
+    override suspend fun getSwitchUserRestriction(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P)
+            throw SuperUserException(ANDROID_VERSION_INCORRECT.format(Build.VERSION_CODES.P),UIText.StringResource(R.string.wrong_android_version,Build.VERSION_CODES.P.toString()))
+        return try {
+            executeRootCommand("dumpsys user | grep \"${UserManager.DISALLOW_USER_SWITCH}\"").out[0].endsWith(UserManager.DISALLOW_USER_SWITCH)
+        } catch (e: SuperUserException) {
+            false
+        }
+    }
+
+
+    override suspend fun getSafeBootStatus(): Boolean =
+        executeRootCommand("dumpsys device_policy | grep \"${UserManager.DISALLOW_SAFE_BOOT}\"").out[0].endsWith(UserManager.DISALLOW_SAFE_BOOT)
+
+
+    override suspend fun getMultiuserUIStatus(): Boolean =
+        executeRootCommand("getprop fw.show_multiuserui").out[0].toInt().toBoolean()
 
     fun askSuperUserRights(): Boolean {
         val result = Shell.cmd("id").exec()
@@ -103,5 +142,6 @@ class Root @Inject constructor(@ApplicationContext private val context: Context,
 
   companion object {
       private const val NO_ROOT_RIGHTS = "App doesn't have root rights"
+      private const val ANDROID_VERSION_INCORRECT = "Wrong android version, SDK version %s or higher required"
   }
 }

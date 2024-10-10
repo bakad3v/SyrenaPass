@@ -18,9 +18,8 @@
     android:id="@+id/logsFragment"
     android:name="com.android.aftools.presentation.fragments.LogsFragment" />
   <fragment
-    android:id="@+id/aboutFragment"
-    android:name="com.android.aftools.presentation.fragments.AboutFragment"
-    android:label="AboutFragment" />
+      android:id="@+id/aboutFragment"
+      android:name="com.android.aftools.presentation.fragments.AboutFragment" />
   <fragment
     android:id="@+id/settingsFragment"
     android:name="com.android.aftools.presentation.fragments.SettingsFragment" />

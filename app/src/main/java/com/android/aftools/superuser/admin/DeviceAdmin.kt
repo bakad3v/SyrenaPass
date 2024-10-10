@@ -92,7 +92,7 @@ class DeviceAdmin @Inject constructor(@ApplicationContext private val context: C
         throw SuperUserException(ADMIN_ERROR_TEXT, UIText.StringResource(R.string.device_admin_error))
     }
 
-    override suspend fun enableMultiuserUI() {
+    override suspend fun setMultiuserUI(status: Boolean) {
         throw SuperUserException(ADMIN_ERROR_TEXT,UIText.StringResource(R.string.device_admin_error))
     }
 
@@ -104,7 +104,31 @@ class DeviceAdmin @Inject constructor(@ApplicationContext private val context: C
         throw SuperUserException(ADMIN_ERROR_TEXT,UIText.StringResource(R.string.device_admin_error))
     }
 
-    override suspend fun disableSafeBoot() {
+    override suspend fun setSafeBootStatus(status: Boolean) {
+        throw SuperUserException(ADMIN_ERROR_TEXT,UIText.StringResource(R.string.device_admin_error))
+    }
+
+    override suspend fun getSafeBootStatus(): Boolean {
+        throw SuperUserException(ADMIN_ERROR_TEXT,UIText.StringResource(R.string.device_admin_error))
+    }
+
+    override suspend fun getMultiuserUIStatus(): Boolean {
+        throw SuperUserException(ADMIN_ERROR_TEXT,UIText.StringResource(R.string.device_admin_error))
+    }
+
+    override suspend fun setUserSwitcherStatus(status: Boolean) {
+        throw SuperUserException(ADMIN_ERROR_TEXT,UIText.StringResource(R.string.device_admin_error))
+    }
+
+    override suspend fun getUserSwitcherStatus(): Boolean {
+        throw SuperUserException(ADMIN_ERROR_TEXT,UIText.StringResource(R.string.device_admin_error))
+    }
+
+    override suspend fun setSwitchUserRestriction(status: Boolean) {
+        throw SuperUserException(ADMIN_ERROR_TEXT,UIText.StringResource(R.string.device_admin_error))
+    }
+
+    override suspend fun getSwitchUserRestriction(): Boolean {
         throw SuperUserException(ADMIN_ERROR_TEXT,UIText.StringResource(R.string.device_admin_error))
     }
 

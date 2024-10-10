@@ -10,7 +10,7 @@ interface SettingsRepository {
   suspend fun setTheme(theme: Theme)
   suspend fun setServiceStatus(working: Boolean)
   suspend fun setRunOnBoot(status: Boolean)
-    suspend fun setDeleteApps(new: Boolean)
+  suspend fun setDeleteApps(new: Boolean)
   suspend fun setDeleteFiles(new: Boolean)
   suspend fun setDeleteProfiles(new: Boolean)
   suspend fun setTRIM(new: Boolean)
@@ -18,12 +18,18 @@ interface SettingsRepository {
   suspend fun runRoot(new: Boolean)
   suspend fun sendBroadcast(new: Boolean)
   suspend fun setRemoveItself(new: Boolean)
-    suspend fun setLogdOnStart(new: Boolean)
+  suspend fun setLogdOnStart(new: Boolean)
   suspend fun setLogdOnBoot(new: Boolean)
   suspend fun setClearAndHide(new: Boolean)
-    suspend fun setUserLimit(limit: Int)
-  suspend fun enableMultiuserUI()
-    suspend fun getUserLimit(): Int?
-    suspend fun disableSafeBoot()
-    suspend fun setRunOnDuressPassword(status: Boolean)
+  suspend fun setUserLimit(limit: Int)
+  suspend fun getUserLimit(): Int?
+  suspend fun setRunOnDuressPassword(status: Boolean)
+  suspend fun setMultiuserUIStatus(status: Boolean)
+  suspend fun setSafeBootStatus(status: Boolean)
+  suspend fun getSafeBootStatus(): Boolean
+  suspend fun setSwitchUserRestriction(status: Boolean)
+  suspend fun getSwitchUserRestriction(): Boolean
+  suspend fun getUserSwitcherStatus(): Boolean
+  suspend fun setUserSwitcherStatus(status: Boolean)
+  suspend fun getMultiuserUIStatus(): Boolean
 }

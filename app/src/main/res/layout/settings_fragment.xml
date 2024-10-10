@@ -4,12 +4,11 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
         android:orientation="vertical">
 
 
@@ -19,6 +18,7 @@
             android:layout_height="wrap_content"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
+            android:paddingTop="8dp"
             android:text="@string/ui_settings"
             android:textStyle="bold">
         </com.google.android.material.textview.MaterialTextView>
@@ -107,6 +107,7 @@
                 android:id="@+id/switch_trim"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+
                 android:padding="8dp" />
         </LinearLayout>
 
@@ -421,7 +422,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingBottom="8dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -587,6 +589,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
+            android:paddingBottom="8dp"
             android:orientation="horizontal">
             <LinearLayout
                 android:layout_width="match_parent"
@@ -647,7 +650,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
-            android:id="@+id/allow_multiuser_ui"
+            android:id="@+id/set_multiuser_ui"
             android:orientation="horizontal">
 
             <LinearLayout
@@ -662,7 +665,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingStart="8dp"
-                android:text="@string/allow_multiuser_ui">
+                android:text="@string/multiuser_ui">
 
             </com.google.android.material.textview.MaterialTextView>
 
@@ -686,10 +689,95 @@
         </LinearLayout>
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:id="@+id/set_user_switcher_ui"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <com.google.android.material.textview.MaterialTextView
+                    style="?attr/textAppearanceTitleLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="8dp"
+                    android:text="@string/switch_user_ui">
+
+                </com.google.android.material.textview.MaterialTextView>
+
+                <com.google.android.material.textview.MaterialTextView
+                    style="?attr/textAppearanceLabelLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:paddingStart="8dp"
+                    android:text="@string/root_only_android10">
+
+                </com.google.android.material.textview.MaterialTextView>
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:padding="8dp"
+                app:icon="@drawable/ic_baseline_settings_24" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:id="@+id/switch_user_permission"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <com.google.android.material.textview.MaterialTextView
+                    style="?attr/textAppearanceTitleLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="8dp"
+                    android:text="@string/switch_user_permission">
+
+                </com.google.android.material.textview.MaterialTextView>
+
+                <com.google.android.material.textview.MaterialTextView
+                    style="?attr/textAppearanceLabelLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:paddingStart="8dp"
+                    android:text="@string/root_and_owner_android9">
+
+                </com.google.android.material.textview.MaterialTextView>
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:padding="8dp"
+                app:icon="@drawable/ic_baseline_settings_24" />
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/users_limit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
+            android:paddingBottom="8dp"
             android:orientation="vertical">
 
             <com.google.android.material.textview.MaterialTextView
@@ -735,7 +823,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
-            android:id="@+id/disable_safe_boot"
+            android:id="@+id/set_safe_boot"
             android:orientation="horizontal">
 
             <LinearLayout
@@ -750,7 +838,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingStart="8dp"
-                android:text="@string/disable_safe_boot">
+                android:text="@string/safe_boot_status">
 
             </com.google.android.material.textview.MaterialTextView>
 

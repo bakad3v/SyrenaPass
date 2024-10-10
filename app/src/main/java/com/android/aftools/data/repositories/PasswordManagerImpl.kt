@@ -10,26 +10,20 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-/**
- * Repository for handling operations with user password and encrypted database
- */
+
 class PasswordManagerImpl @Inject constructor(
   @ApplicationContext private val context: Context,
   passwordStatusSerializer: PasswordStatusSerializer
 ) : PasswordManager {
   private val Context.passwordPrefs by dataStoreDirectBootAware(PREFERENCES_NAME,passwordStatusSerializer)
 
-  /**
-   * Is encrypted database created?
-   */
+
   override val passwordStatus = context.passwordPrefs.data.map { preferences ->
     preferences.passwordSet
   }
 
 
-  /**
-   * Function for creating password
-   */
+
   override suspend fun setPassword(password: CharArray) {
     context.passwordPrefs.updateData {
       PasswordStatus(password = password.concatToString(), passwordSet = true)
@@ -37,9 +31,7 @@ class PasswordManagerImpl @Inject constructor(
     password.clear()
   }
 
-  /**
-   * Function for password validation
-   */
+
   override suspend fun checkPassword(password: CharArray): Boolean {
     val currentPassword = context.passwordPrefs.data.first().password
     val rightPassword = password.concatToString() == currentPassword

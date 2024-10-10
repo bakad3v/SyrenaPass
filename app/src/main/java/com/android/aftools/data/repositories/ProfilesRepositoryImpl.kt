@@ -60,10 +60,6 @@ class ProfilesRepositoryImpl @Inject constructor(
 
     override fun getProfilesToDelete() : Flow<List<Int>> = context.profilesDatastore.data.map { it.list }
 
-    override suspend fun deleteProfile(id: Int) {
-        context.profilesDatastore.updateData { it.delete(id) }
-    }
-
     override suspend fun setProfileDeletionStatus(id: Int, status: Boolean) {
         context.profilesDatastore.updateData {
             if (status) {

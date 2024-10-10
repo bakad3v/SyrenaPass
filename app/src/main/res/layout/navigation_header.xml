@@ -14,6 +14,7 @@
     app:layout_constraintTop_toTopOf="parent"
     android:src="@drawable/circle_shape"
     android:contentDescription="@string/logo_background" />
+
   <ImageView
     android:layout_width="40dp"
     android:layout_height="40dp"
@@ -21,8 +22,8 @@
     android:layout_marginTop="31dp"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
-    android:src="@drawable/baseline_password_24"
-    android:contentDescription="TODO" />
+    android:src="@drawable/baseline_shield_24"
+      />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

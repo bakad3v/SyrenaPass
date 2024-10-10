@@ -31,6 +31,14 @@ import com.android.aftools.presentation.viewmodels.SettingsVM
 import com.android.aftools.presentation.viewmodels.SettingsVM.Companion.BRUTEFORCE_DIALOG
 import com.android.aftools.presentation.viewmodels.SettingsVM.Companion.CHANGE_USER_LIMIT_DIALOG
 import com.android.aftools.presentation.viewmodels.SettingsVM.Companion.CLEAR_AND_HIDE_DIALOG
+import com.android.aftools.presentation.viewmodels.SettingsVM.Companion.DISABLE_MULTIUSER_UI_DIALOG
+import com.android.aftools.presentation.viewmodels.SettingsVM.Companion.DISABLE_SAFE_BOOT_RESTRICTION_DIALOG
+import com.android.aftools.presentation.viewmodels.SettingsVM.Companion.DISABLE_SWITCH_USER_RESTRICTION_DIALOG
+import com.android.aftools.presentation.viewmodels.SettingsVM.Companion.DISABLE_USER_SWITCHER_DIALOG
+import com.android.aftools.presentation.viewmodels.SettingsVM.Companion.ENABLE_MULTIUSER_UI_DIALOG
+import com.android.aftools.presentation.viewmodels.SettingsVM.Companion.ENABLE_SAFE_BOOT_RESTRICTION_DIALOG
+import com.android.aftools.presentation.viewmodels.SettingsVM.Companion.ENABLE_SWITCH_USER_RESTRICTION_DIALOG
+import com.android.aftools.presentation.viewmodels.SettingsVM.Companion.ENABLE_USER_SWITCHER_DIALOG
 import com.android.aftools.presentation.viewmodels.SettingsVM.Companion.INSTALL_DIZUKU_DIALOG
 import com.android.aftools.presentation.viewmodels.SettingsVM.Companion.LOGD_ON_BOOT_DIALOG
 import com.android.aftools.presentation.viewmodels.SettingsVM.Companion.LOGD_ON_START_DIALOG
@@ -104,12 +112,13 @@ class SettingsFragment : Fragment() {
     startActivity(viewModel.adminRightsIntent())
   }
 
+  /**
+   * Function for setting switch state without triggering OnCheckedChangeListener
+   */
   private fun MaterialSwitch.setCheckedProgrammatically(value: Boolean, listener: CompoundButton.OnCheckedChangeListener) {
-    if (value!=isChecked) {
       setOnCheckedChangeListener(null)
       isChecked = value
       setOnCheckedChangeListener(listener)
-    }
   }
 
   /**
@@ -266,24 +275,33 @@ class SettingsFragment : Fragment() {
     binding.usersLimit.setOnClickListener {
       viewModel.showChangeUserLimitDialog()
     }
-    binding.switchAccessibility.setOnCheckedChangeListener(switchAccessibilityServiceListener)
-    binding.switchAdmin.setOnCheckedChangeListener(switchAdminListener)
-    binding.switchDhizuku.setOnCheckedChangeListener(switchDhizukuListener)
-    binding.switchRoot.setOnCheckedChangeListener(switchRootListener)
-    binding.switchTrim.setOnCheckedChangeListener(switchTrimListener)
-    binding.switchWipe.setOnCheckedChangeListener(switchWipeListener)
-    binding.switchSelfDestruct.setOnCheckedChangeListener(switchSelfDestructListener)
-    binding.switchUsbConnection.setOnCheckedChangeListener(switchUsbListener)
-    binding.switchBruteforce.setOnCheckedChangeListener(switchBruteforceListener)
-    binding.switchLogdOnBoot.setOnCheckedChangeListener(switchLogdOnBootListener)
-    binding.switchLogdOnStart.setOnCheckedChangeListener(switchLogdOnStartListener)
-    binding.switchClearAndHide.setOnCheckedChangeListener(switchClearAndHideListener)
-    binding.switchRunOnPassword.setOnCheckedChangeListener(switchRunOnDuressPasswordListener)
-    binding.allowMultiuserUi.setOnClickListener {
-      viewModel.enableMultiuserUI()
+    if (!viewModel.switchesInitialized) {
+      binding.switchAccessibility.setOnCheckedChangeListener(switchAccessibilityServiceListener)
+      binding.switchAdmin.setOnCheckedChangeListener(switchAdminListener)
+      binding.switchDhizuku.setOnCheckedChangeListener(switchDhizukuListener)
+      binding.switchRoot.setOnCheckedChangeListener(switchRootListener)
+      binding.switchTrim.setOnCheckedChangeListener(switchTrimListener)
+      binding.switchWipe.setOnCheckedChangeListener(switchWipeListener)
+      binding.switchSelfDestruct.setOnCheckedChangeListener(switchSelfDestructListener)
+      binding.switchUsbConnection.setOnCheckedChangeListener(switchUsbListener)
+      binding.switchBruteforce.setOnCheckedChangeListener(switchBruteforceListener)
+      binding.switchLogdOnBoot.setOnCheckedChangeListener(switchLogdOnBootListener)
+      binding.switchLogdOnStart.setOnCheckedChangeListener(switchLogdOnStartListener)
+      binding.switchClearAndHide.setOnCheckedChangeListener(switchClearAndHideListener)
+      binding.switchRunOnPassword.setOnCheckedChangeListener(switchRunOnDuressPasswordListener)
+      viewModel.switchesInitialized = true
     }
-    binding.disableSafeBoot.setOnClickListener {
-      viewModel.disableSafeBoot()
+    binding.setMultiuserUi.setOnClickListener {
+      viewModel.changeMultiuserUISettingsDialog()
+    }
+    binding.setSafeBoot.setOnClickListener {
+      viewModel.changeSafeBootRestrictionSettingsDialog()
+    }
+    binding.setUserSwitcherUi.setOnClickListener {
+      viewModel.changeUserSwitcherDialog()
+    }
+    binding.switchUserPermission.setOnClickListener {
+      viewModel.changeSwitchUserDialog()
     }
     binding.allowedAttempts.setOnClickListener {
       viewModel.editMaxPasswordAttemptsDialog()
@@ -431,6 +449,62 @@ class SettingsFragment : Fragment() {
       viewLifecycleOwner
     ) {
       viewModel.setRunOnDuressPassword(true)
+    }
+    QuestionDialog.setupListener(
+      parentFragmentManager,
+      ENABLE_SAFE_BOOT_RESTRICTION_DIALOG,
+      viewLifecycleOwner
+    ) {
+      viewModel.setSafeBoot(true)
+    }
+    QuestionDialog.setupListener(
+      parentFragmentManager,
+      DISABLE_SAFE_BOOT_RESTRICTION_DIALOG,
+      viewLifecycleOwner
+    ) {
+      viewModel.setSafeBoot(false)
+    }
+    QuestionDialog.setupListener(
+      parentFragmentManager,
+      ENABLE_MULTIUSER_UI_DIALOG,
+      viewLifecycleOwner
+    ) {
+      viewModel.setMultiuserUI(true)
+    }
+    QuestionDialog.setupListener(
+      parentFragmentManager,
+      DISABLE_MULTIUSER_UI_DIALOG,
+      viewLifecycleOwner
+    ) {
+      viewModel.setMultiuserUI(false)
+    }
+    QuestionDialog.setupListener(
+      parentFragmentManager,
+      ENABLE_USER_SWITCHER_DIALOG,
+      viewLifecycleOwner
+    ) {
+      viewModel.setUserSwitcher(true)
+    }
+    QuestionDialog.setupListener(
+      parentFragmentManager,
+      DISABLE_USER_SWITCHER_DIALOG,
+      viewLifecycleOwner
+    ) {
+      viewModel.setUserSwitcher(false)
+    }
+    QuestionDialog.setupListener(
+      parentFragmentManager,
+      ENABLE_SWITCH_USER_RESTRICTION_DIALOG,
+      viewLifecycleOwner
+    ) {
+      viewModel.setUserSwitchRestriction(true)
+    }
+    QuestionDialog.setupListener(
+      parentFragmentManager,
+      DISABLE_SWITCH_USER_RESTRICTION_DIALOG,
+      viewLifecycleOwner
+    ) {
+      viewModel.setUserSwitchRestriction(false)
     }
   }
 
