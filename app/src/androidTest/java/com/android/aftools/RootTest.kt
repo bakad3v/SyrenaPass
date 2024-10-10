@@ -7,7 +7,6 @@ import com.android.aftools.data.mappers.ProfilesMapper
 import com.android.aftools.presentation.utils.UIText
 import com.android.aftools.superuser.superuser.SuperUserException
 import com.anggrayudi.storage.extension.toBoolean
-import com.anggrayudi.storage.extension.toInt
 import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.joinAll

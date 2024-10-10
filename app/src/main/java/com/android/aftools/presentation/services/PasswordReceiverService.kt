@@ -9,7 +9,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.usb.UsbManager
 import android.os.UserManager
-import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import com.android.aftools.domain.usecases.passwordManager.CheckPasswordUseCase
 import com.android.aftools.domain.usecases.settings.GetSettingsUseCase

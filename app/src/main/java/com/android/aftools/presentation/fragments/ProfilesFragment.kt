@@ -1,8 +1,6 @@
 package com.android.aftools.presentation.fragments
 
-import android.app.admin.DevicePolicyManager
 import android.content.ActivityNotFoundException
-import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -23,7 +21,6 @@ import com.android.aftools.presentation.activities.MainActivity
 import com.android.aftools.presentation.adapters.profileAdapter.ProfileAdapter
 import com.android.aftools.presentation.dialogs.DialogLauncher
 import com.android.aftools.presentation.dialogs.QuestionDialog
-import com.android.aftools.presentation.receivers.DeviceAdminReceiver
 import com.android.aftools.presentation.states.ActivityState
 import com.android.aftools.presentation.states.ProfilesDataState
 import com.android.aftools.presentation.viewmodels.ProfilesVM
